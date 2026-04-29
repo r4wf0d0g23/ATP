@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/workers/worker-job",
+  "title": "ATP Worker Job Spec",
+  "description": "Defines the input specification for a single ATP worker execution",
+  "type": "object",
+  "required": ["job_id", "tier", "trigger", "model_class", "scope", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique job identifier: <tier>-<YYYY-MM-DD>-<slug>"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["t1", "t2", "t3"],
+      "description": "Worker tier. Determines authorization, output type, and model class."
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["cron", "webhook", "pr-event", "manual"],
+      "description": "What triggered this job"
+    },
+    "model_class": {
+      "type": "string",
+      "enum": ["fast", "balanced", "capable"],
+      "description": "fast=low cost bulk ops. balanced=quality/cost tradeoff. capable=deep reasoning. Maps to deployment's configured model per class."
+    },
+    "scope": {
+      "type": "object",
+      "required": ["target"],
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "type": "string",
+          "enum": ["all-protocols", "all-vars", "changed-files", "open-prs", "reports", "single-protocol", "single-var"],
+          "description": "What the worker operates on"
+        },
+        "file_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific file paths when target=changed-files or single-*"
+        },
+        "pr_numbers": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "description": "PR numbers when target=open-prs"
+        },
+        "repo": {
+          "type": "string",
+          "description": "GitHub repo in owner/name format"
+        }
+      }
+    },
+    "conflict_check": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to check open PRs before opening new ones. Always true for T1."
+    },
+    "cost_efficiency_ratio": {
+      "type": "number",
+      "minimum": 0.01,
+      "description": "Current T3 cost_efficiency_ratio snapshot at job creation time. Used to calculate if T3 frequency should be adjusted."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/execution-receipt/handoff-artifact",
+  "title": "ATP Handoff Artifact (Execution Receipt)",
+  "description": "Canonical receipt schema written by a completing task (sub-agent or primary) and validated by the T2 receipt scan. Execution receipts are handoff artifacts — there is one schema, not two.",
+  "x-schema-version": "0.1.0",
+  "type": "object",
+  "required": [
+    "bundle_id",
+    "protocol_id",
+    "completed_at",
+    "execution_phase_reached",
+    "result",
+    "changes",
+    "var_updates",
+    "next_action",
+    "state_after"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "bundle_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique receipt identifier. Must match the bundle_id assigned when the task was spawned so T2 can correlate receipts to spawned tasks."
+    },
+    "protocol_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "ID of the protocol that produced this receipt. kebab-case, matches the protocol's frontmatter `id`."
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp marking when the task finished (successfully or not)."
+    },
+    "execution_phase_reached": {
+      "type": "string",
+      "enum": [
+        "context-determination",
+        "variable-validation",
+        "context-preload",
+        "interaction-execution",
+        "post-execution-review",
+        "output"
+      ],
+      "description": "The furthest ATP canonical phase reached before completion or halt. Matches the 6 phases defined in the root SPEC.md."
+    },
+    "result": {
+      "type": "string",
+      "enum": ["success", "partial", "failure"],
+      "description": "success=all phases completed including post-execution var updates. partial=execution completed but post-execution review missed or incomplete. failure=halted before or during execution."
+    },
+    "changes": {
+      "type": "array",
+      "description": "Structured list of state changes applied during execution. Empty array allowed for read-only or fully-idempotent tasks.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "target", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Category of change (e.g. 'file-write', 'git-commit', 'api-call', 'var-update', 'deploy')."
+          },
+          "target": {
+            "type": "string",
+            "description": "What the change applied to (file path, var id, endpoint, resource identifier)."
+          },
+          "summary": {
+            "type": "string",
+            "description": "One-line human-readable description of the change."
+          }
+        }
+      }
+    },
+    "var_updates": {
+      "type": "array",
+      "description": "Variable IDs updated during post-execution review. Empty array if no vars changed.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "enum": ["none", "continue", "escalate"],
+      "description": "What should happen next. none=task fully done, no follow-up. continue=additional work queued or expected. escalate=review authority or deployment owner intervention required."
+    },
+    "state_after": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Free-form snapshot of task-relevant state after execution. Keys are task-specific; T2 does not enforce structure here, only presence."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warn", "critical"],
+      "description": "Optional severity of the receipt itself when the task produced a notable outcome. Matches the ATP canonical severity vocabulary: info=awareness only, warn=recoverable issue, critical=halt-level. Absent when the task completed cleanly with no notable outcome."
+    }
+  }
+}

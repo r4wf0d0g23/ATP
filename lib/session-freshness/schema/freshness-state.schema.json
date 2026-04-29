@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/session-freshness/freshness-state",
+  "title": "ATP Session Freshness State",
+  "description": "Tracks within-session freshness of loaded variables. Detects when session-cache vars have aged past their within-session TTL.",
+  "type": "object",
+  "required": ["session_id", "session_start", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "session_id": { "type": "string" },
+    "session_start": { "type": "string", "format": "date-time" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["var_id", "loaded_at", "staleness_policy", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "var_id": { "type": "string" },
+          "loaded_at": { "type": "string", "format": "date-time" },
+          "staleness_policy": { "type": "string" },
+          "session_ttl_minutes": {
+            "type": "integer",
+            "description": "Within-session TTL in minutes. Null = no within-session expiry."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["fresh", "aging", "stale", "re-verified"],
+            "description": "fresh=within TTL. aging=past 75% of TTL, re-verify recommended. stale=TTL exceeded, re-verify required. re-verified=was stale, re-verify ran and passed."
+          },
+          "last_verified_at": { "type": "string", "format": "date-time" },
+          "use_count": {
+            "type": "integer",
+            "description": "Number of times this var was accessed this session"
+          }
+        }
+      }
+    }
+  }
+}

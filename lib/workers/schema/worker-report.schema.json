@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/workers/worker-report",
+  "title": "ATP Worker Report",
+  "description": "Structured output record from a single ATP worker execution",
+  "type": "object",
+  "required": ["report_id", "job_id", "tier", "trigger", "status", "summary", "findings", "actions_taken", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "description": "Unique report identifier: <tier>-<YYYY-MM-DD>-<slug>"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "The worker-job that produced this report"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["t1", "t2", "t3"]
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["cron", "webhook", "pr-event", "manual"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["clean", "findings", "escalated", "failed"],
+      "description": "clean=no issues found. findings=issues found, actions taken. escalated=critical finding routed to authority. failed=worker itself failed."
+    },
+    "summary": {
+      "type": "string",
+      "description": "1-3 sentence plain-language summary of findings and actions"
+    },
+    "files_scanned": {
+      "type": "integer",
+      "description": "Number of files examined"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "severity", "file", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "schema-violation",
+              "missing-required-field",
+              "private-content-leaked",
+              "validation-failure",
+              "staleness-drift",
+              "conflict-detected",
+              "index-drift",
+              "pr-conflict",
+              "anomaly",
+              "poison-suspected",
+              "report-stale",
+              "report-duplicate"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warn", "critical"]
+          },
+          "file": {
+            "type": "string",
+            "description": "File path where finding was detected"
+          },
+          "line": {
+            "type": "integer",
+            "description": "Line number if applicable"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Clear description of the finding"
+          },
+          "suggested_fix": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "What the worker recommends to resolve this finding"
+          },
+          "related_pr": {
+            "type": "integer",
+            "description": "PR number if this finding is related to an open PR"
+          }
+        }
+      }
+    },
+    "actions_taken": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "result"],
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "pr-opened",
+              "pr-comment-added",
+              "pr-approved",
+              "pr-blocked",
+              "var-last-verified-updated",
+              "var-value-hash-updated",
+              "report-deduplicated",
+              "report-stale-removed",
+              "escalation-triggered",
+              "conflict-check-passed",
+              "conflict-check-failed"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "description": "File, PR number, or resource acted upon"
+          },
+          "result": {
+            "type": "string",
+            "enum": ["success", "skipped", "failed"]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "prs_checked_for_conflict": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "description": "PR numbers checked during conflict prevention (T1)"
+    },
+    "prs_opened": {
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+    "prs_reviewed": {
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+    "reports_cleansed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duplicates_removed": { "type": "integer" },
+        "stale_removed": { "type": "integer" },
+        "anomalies_synthesized": { "type": "integer" }
+      },
+      "description": "T3 cleanse stats"
+    },
+    "cost_efficiency_ratio_snapshot": {
+      "type": "number",
+      "description": "T3 ratio at time of execution — used to track progression over time"
+    },
+    "execution_duration_ms": {
+      "type": "integer"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

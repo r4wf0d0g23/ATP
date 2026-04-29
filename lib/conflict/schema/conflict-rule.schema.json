@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/conflict/conflict-rule",
+  "title": "ATP Protocol Conflict Rule",
+  "description": "Explicit resolution rule for when two protocols both match the same input above threshold.",
+  "type": "object",
+  "required": ["id", "protocol_a", "protocol_b", "resolution", "winner", "rationale"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "protocol_a": { "type": "string" },
+    "protocol_b": { "type": "string" },
+    "resolution": {
+      "type": "string",
+      "enum": ["priority", "specificity", "manual"],
+      "description": "priority=higher priority field wins. specificity=more specific trigger match wins. manual=this rule defines the winner explicitly."
+    },
+    "winner": {
+      "type": "string",
+      "description": "Must equal the value of protocol_a or protocol_b. Validators must enforce this constraint programmatically (JSON Schema draft-07 does not support cross-field equality natively)."
+    },
+    "context_conditions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional: additional context conditions under which this rule applies. If empty, rule applies unconditionally."
+    },
+    "rationale": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Human-readable explanation of why this resolution was chosen"
+    },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+  }
+}

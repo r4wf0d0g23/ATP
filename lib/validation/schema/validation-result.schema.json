@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/validation/validation-result",
+  "title": "ATP Validation Result",
+  "description": "Result of running a validator against a variable's verify_cmd output",
+  "type": "object",
+  "required": ["var_id", "validator_type", "status", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "var_id": { "type": "string" },
+    "validator_type": {
+      "type": "string",
+      "enum": ["ssh-command", "json-config", "package-id", "endpoint", "regex", "custom"],
+      "description": "Which validator was applied"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail", "poison-suspected"],
+      "description": "pass=valid. warn=valid but anomalies detected. fail=invalid format or value. poison-suspected=validation passed structurally but poisoning heuristics triggered."
+    },
+    "value_hash": {
+      "type": "string",
+      "description": "SHA-256 of the verified value. Used to detect if a value has changed between sessions without storing the raw value."
+    },
+    "previous_value_hash": {
+      "type": "string",
+      "description": "Hash from the previous verification. If different, flag as changed."
+    },
+    "anomalies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "description", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string" },
+          "description": { "type": "string", "maxLength": 2000 },
+          "severity": { "type": "string", "enum": ["info", "warn", "critical"] }
+        }
+      },
+      "description": "Detected anomalies. Empty array = none."
+    },
+    "poisoning_signals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Poisoning heuristic patterns that matched, if any"
+    },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

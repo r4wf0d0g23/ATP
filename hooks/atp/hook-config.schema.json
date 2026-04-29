@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://hooks/atp/hook-config",
+  "title": "ATP Hook Configuration",
+  "type": "object",
+  "required": ["protocol_triggers", "state_change_indicators"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_triggers": {
+      "type": "object",
+      "description": "Map of protocol-id to array of trigger strings",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
+    },
+    "state_change_indicators": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Strings that indicate a state-changing operation occurred"
+    }
+  }
+}

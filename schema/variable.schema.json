@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://schema/variable",
+  "title": "ATP Variable",
+  "description": "Schema for Agent Task Protocol variable definition files",
+  "x-schema-version": "0.1.0",
+  "type": "object",
+  "required": ["id", "name", "version", "status", "classification", "created", "last_verified", "verified_by", "staleness_policy", "validator", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique kebab-case variable identifier"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Human-readable variable name"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "deprecated"]
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "private", "template"],
+      "description": "public=structural template only, no real values. private=contains live state, deployment-specific values, or credentials refs. template=placeholder values, ATP repo templates/. All vars with real values are private."
+    },
+    "created": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "last_verified": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "verified_by": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Agent ID or role that last verified this value"
+    },
+    "staleness_policy": {
+      "type": "string",
+      "pattern": "^(always-verify|session-cache(:\\d+m)?|ttl:\\d+d|on-change-only)$",
+      "description": "always-verify: verify every use. session-cache[:Nm]: once per session, optional N-minute within-session TTL. ttl:Nd: re-verify if older than N days. on-change-only: trust until change event logged."
+    },
+    "session_ttl_minutes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Within-session TTL override in minutes. Applies to session-cache vars. Overrides the default 120 minutes."
+    },
+    "validator": {
+      "type": "string",
+      "enum": ["ssh-command", "json-config", "package-id", "endpoint", "regex", "custom"],
+      "description": "Which validator type to apply to verify_cmd output. See lib/validation/validators/ for validator specs."
+    },
+    "verify_cmd": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Shell command to verify current value. Required for always-verify and session-cache policies."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["live", "config", "derived"],
+      "description": "live=running infrastructure. config=file/config state. derived=computed from other sources."
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "type": {
+            "type": "string",
+            "enum": ["requires", "enriches"],
+            "description": "requires=hard dependency, blocks loading. enriches=soft dependency, improves context but non-blocking."
+          }
+        }
+      },
+      "description": "Variables that must be verified before this variable can be used."
+    }
+  },
+  "if": {
+    "properties": {
+      "staleness_policy": {
+        "pattern": "^(always-verify|session-cache(:\\d+m)?)$"
+      }
+    },
+    "required": ["staleness_policy"]
+  },
+  "then": {
+    "required": ["verify_cmd"]
+  }
+}

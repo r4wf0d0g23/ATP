@@ -1,0 +1,21 @@
+# Instance deployment files — these contain live state, credentials refs,
+# and deployment-specific values. Never commit to the public ATP repo.
+instance/
+atp-instance/
+vars/*.md
+!vars/.gitkeep
+protocols/*.md
+!protocols/.gitkeep
+
+# Private overrides
+*.private.md
+*.local.md
+
+# Worker reports — instance-specific output (hostnames, paths, runtime state).
+# Never commit to the public ATP repo. Per lib/workers/SPEC.md, reports route
+# to the instance overlay (atp-instance/reports/), not this directory.
+reports/*
+!reports/.gitkeep
+
+# CI dependency cache (created by .github/workflows/schema-validation.yml)
+ci-deps/

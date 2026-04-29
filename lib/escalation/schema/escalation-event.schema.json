@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/escalation/escalation-event",
+  "title": "ATP Escalation Event",
+  "description": "Structured record of an escalation trigger with full context snapshot for the receiving authority.",
+  "type": "object",
+  "required": ["id", "protocol_id", "trigger_text", "severity", "execution_phase", "routed_to", "requires_ack", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique escalation event ID"
+    },
+    "protocol_id": { "type": "string" },
+    "trigger_text": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "The exact escalation rule text from the protocol that fired"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warn", "critical"],
+      "description": "info=awareness only, no action required. warn=action recommended, non-blocking. critical=halt, action required before proceeding."
+    },
+    "execution_phase": {
+      "type": "string",
+      "enum": [
+        "context-determination",
+        "variable-validation",
+        "context-preload",
+        "interaction-execution",
+        "post-execution-review",
+        "output"
+      ],
+      "description": "Which phase of the ATP loop triggered this escalation. Canonical phase list is defined in the root SPEC.md."
+    },
+    "context_snapshot": {
+      "type": "object",
+      "description": "State at the time of escalation",
+      "additionalProperties": false,
+      "properties": {
+        "var_states": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["verified", "stale", "failed", "not-loaded"]
+          }
+        },
+        "validation_results": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "last_action": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Description of the last action taken before escalation triggered"
+        }
+      }
+    },
+    "routed_to": {
+      "type": "string",
+      "description": "Role or agent ID this escalation is directed to"
+    },
+    "requires_ack": {
+      "type": "boolean",
+      "description": "If true, execution must halt until acknowledgment is received"
+    },
+    "ack_received": {
+      "type": "boolean",
+      "default": false
+    },
+    "ack_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "How the escalation was resolved"
+    },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

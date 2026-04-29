@@ -1,0 +1,127 @@
+name: Schema Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-schemas:
+    name: Validate JSON Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli@5 ajv-formats@3
+
+      - name: Validate schema files are well-formed JSON Schema
+        run: |
+          set -e
+          for f in schema/*.json; do
+            echo "Validating schema syntax: $f"
+            # ajv compile asserts the schema itself is valid; -c ajv-formats
+            # registers the standard format vocab (date-time, uri, etc.).
+            ajv compile -c ajv-formats -s "$f" --strict=false || exit 1
+          done
+
+      - name: Validate lib schemas are well-formed JSON Schema
+        run: |
+          set -e
+          # Each lib may publish its own schemas under lib/<name>/schema/
+          shopt -s globstar nullglob
+          for f in lib/**/schema/*.json; do
+            echo "Validating lib schema: $f"
+            ajv compile -c ajv-formats -s "$f" --strict=false || exit 1
+          done
+
+  validate-templates:
+    name: Validate template frontmatter against schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install validator deps locally (so node -e can resolve them)
+        run: |
+          mkdir -p ci-deps
+          cd ci-deps
+          # npm rejects directory names that start with '.' or contain underscores
+          # for `npm init`. Use a plain name and skip init formality.
+          echo '{"name":"atp-ci-deps","private":true}' > package.json
+          npm install --no-fund --no-audit ajv-cli@5 ajv-formats@3 js-yaml@4 >/dev/null
+
+      - name: Extract + validate protocol templates
+        env:
+          NODE_PATH: ${{ github.workspace }}/ci-deps/node_modules
+        run: |
+          set -e
+          AJV="$(pwd)/ci-deps/node_modules/.bin/ajv"
+          for f in templates/protocols/*.md; do
+            echo "Validating protocol: $f"
+            # Extract YAML frontmatter (between first two --- lines)
+            awk 'BEGIN{f=0} /^---$/{f++; next} f==1{print}' "$f" > /tmp/fm.yaml
+            # Convert YAML to JSON (NODE_PATH lets `require('js-yaml')` resolve)
+            node -e "
+              const fs = require('fs');
+              const yaml = require('js-yaml');
+              const fm = yaml.load(fs.readFileSync('/tmp/fm.yaml', 'utf8'));
+              fs.writeFileSync('/tmp/fm.json', JSON.stringify(fm, null, 2));
+            "
+            "$AJV" validate -c ajv-formats -s schema/protocol.schema.json -d /tmp/fm.json --strict=false || {
+              echo "FAIL: $f"
+              exit 1
+            }
+          done
+
+      - name: Extract + validate variable templates
+        env:
+          NODE_PATH: ${{ github.workspace }}/ci-deps/node_modules
+        run: |
+          set -e
+          AJV="$(pwd)/ci-deps/node_modules/.bin/ajv"
+          for f in templates/vars/*.md; do
+            echo "Validating variable: $f"
+            awk 'BEGIN{f=0} /^---$/{f++; next} f==1{print}' "$f" > /tmp/fm.yaml
+            node -e "
+              const fs = require('fs');
+              const yaml = require('js-yaml');
+              const fm = yaml.load(fs.readFileSync('/tmp/fm.yaml', 'utf8'));
+              fs.writeFileSync('/tmp/fm.json', JSON.stringify(fm, null, 2));
+            "
+            "$AJV" validate -c ajv-formats -s schema/variable.schema.json -d /tmp/fm.json --strict=false || {
+              echo "FAIL: $f"
+              exit 1
+            }
+          done
+
+  classification-guard:
+    name: Reject classification=private in public repo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for classification=private in templates and lib
+        run: |
+          set -e
+          # Search public-shipping content for any frontmatter declaring private
+          violations=$(grep -rEn '^classification:\s*private' \
+            templates/ lib/ schema/ skills/ hooks/ protocols/ vars/ \
+            2>/dev/null || true)
+          if [ -n "$violations" ]; then
+            echo "ERROR: classification=private files found in public repo:"
+            echo "$violations"
+            echo ""
+            echo "Per SPEC ## Classification Model, private content must live only"
+            echo "in atp-instance/ overlays, never in this public repo."
+            exit 1
+          fi
+          echo "OK: no classification=private files in public-shipping paths."

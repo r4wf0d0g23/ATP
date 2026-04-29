@@ -1,0 +1,28 @@
+{
+  "protocol_triggers": {
+    "memory-maintenance": [
+      "memory update",
+      "memory review",
+      "update memory.md",
+      "daily log",
+      "memory maintenance",
+      "soul review",
+      "morning brief",
+      "promote to long-term"
+    ],
+    "atp-protocol-review": [
+      "atp review",
+      "protocol staleness",
+      "review protocols",
+      "atp maintenance",
+      "protocol drift"
+    ]
+  },
+  "state_change_indicators": [
+    "docker run",
+    "docker restart",
+    "config set",
+    "git commit",
+    "npm publish"
+  ]
+}

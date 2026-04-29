@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/outcome/outcome",
+  "title": "ATP Protocol Execution Outcome",
+  "description": "Structured record of a single protocol execution. Used by the staleness review loop to assess protocol quality over time.",
+  "type": "object",
+  "required": ["protocol_id", "session_date", "execution_phase_reached", "result", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_id": { "type": "string" },
+    "session_date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "execution_phase_reached": {
+      "type": "string",
+      "enum": [
+        "context-determination",
+        "variable-validation",
+        "context-preload",
+        "interaction-execution",
+        "post-execution-review",
+        "output"
+      ],
+      "description": "The furthest phase reached before completion or failure"
+    },
+    "result": {
+      "type": "string",
+      "enum": ["success", "partial", "failure"],
+      "description": "success=all phases completed including post-update. partial=execution completed but post-update missed or incomplete. failure=halted before or during execution."
+    },
+    "budget_check_status": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail", "skipped"]
+    },
+    "vars_validated": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Variable IDs that were successfully validated this execution"
+    },
+    "vars_failed_validation": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Variable IDs where validation failed"
+    },
+    "vars_updated": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Variable IDs updated in post-execution review"
+    },
+    "vars_missed_update": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Variable IDs that should have been updated but were not"
+    },
+    "escalations_triggered": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Escalation rule text that fired during this execution"
+    },
+    "protocol_needed_logged": {
+      "type": "boolean",
+      "description": "True if this execution resulted in a 'protocol needed' log for a new unmatched pattern"
+    },
+    "failure_reason": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Free text description of why execution failed or was partial"
+    },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

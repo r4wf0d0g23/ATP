@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/protocol-index/index-entry",
+  "title": "ATP Protocol Index Entry",
+  "description": "Vectorable unit for RAG-based protocol retrieval. One entry per protocol.",
+  "type": "object",
+  "required": ["id", "name", "version", "classification", "status", "semantic_summary", "triggers", "preload_size_class", "priority", "requires_var_ids", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "private", "template"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "draft", "deprecated"]
+    },
+    "semantic_summary": {
+      "type": "string",
+      "description": "2-3 sentence dense description optimized for embedding quality. Describes what the protocol covers, what tasks trigger it, and what distinguishes it from similar protocols. Do NOT paraphrase the protocol name — add semantic density."
+    },
+    "triggers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Keyword/pattern triggers for string-match fallback"
+    },
+    "preload_size_class": {
+      "type": "string",
+      "enum": ["xs", "sm", "md", "lg", "xl"],
+      "description": "xs=<500 tokens, sm=<2k, md=<10k, lg=<50k, xl=>50k. Estimated total token cost of all declared vars + docs."
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "description": "Conflict resolution priority. Higher wins when multiple protocols match. Default 50."
+    },
+    "requires_var_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "IDs of variables required by this protocol"
+    },
+    "requires_doc_urls": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "URLs of documentation required by this protocol"
+    },
+    "updated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date this entry was last regenerated"
+    }
+  }
+}

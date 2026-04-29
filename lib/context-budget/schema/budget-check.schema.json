@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/context-budget/budget-check",
+  "title": "ATP Context Budget Check",
+  "description": "Result of a pre-load budget check before executing a protocol",
+  "type": "object",
+  "required": ["protocol_id", "model_context_limit", "bootstrap_cost_estimate", "preload_cost_estimate", "available_headroom", "status", "timestamp"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_id": { "type": "string" },
+    "model_context_limit": {
+      "type": "integer",
+      "description": "Total token capacity of the active model"
+    },
+    "bootstrap_cost_estimate": {
+      "type": "integer",
+      "description": "Estimated tokens consumed by workspace bootstrap files"
+    },
+    "conversation_cost_estimate": {
+      "type": "integer",
+      "description": "Estimated tokens consumed by current conversation history"
+    },
+    "preload_cost_estimate": {
+      "type": "integer",
+      "description": "Estimated tokens for all vars and docs declared in this protocol's requires block"
+    },
+    "available_headroom": {
+      "type": "integer",
+      "description": "Tokens remaining after bootstrap + conversation + preload"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "warn", "fail"],
+      "description": "pass=sufficient headroom. warn=headroom below soft floor (agent should drop low-priority items). fail=preload would exceed context limit."
+    },
+    "dropped_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "id", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "enum": ["var", "doc"] },
+          "id": { "type": "string" },
+          "reason": { "type": "string", "maxLength": 2000 }
+        }
+      },
+      "description": "Items dropped from preload due to budget constraints, ordered by priority (lowest first)"
+    },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,26 @@
+# ATP CODEOWNERS
+#
+# Maps SPEC.md ## Review Chain rules onto GitHub review enforcement.
+# Per SPEC, different review_authority roles apply at different scopes.
+#
+# Note: a CODEOWNERS-required review applies only when the file is in this
+# list AND branch protection requires owner review. The repo currently does
+# not enforce that, so this file is informational until enforcement is set.
+
+# Spec & schema changes — require maintainer review
+SPEC.md                @r4wf0d0g23
+schema/                @r4wf0d0g23
+lib/*/SPEC.md          @r4wf0d0g23
+
+# Hook implementation — platform-specific
+hooks/atp/             @r4wf0d0g23
+
+# Templates and skills — any maintainer
+templates/             @r4wf0d0g23
+skills/                @r4wf0d0g23
+
+# Repo hygiene
+.github/               @r4wf0d0g23
+LICENSE                @r4wf0d0g23
+README.md              @r4wf0d0g23
+CONTRIBUTING.md        @r4wf0d0g23
