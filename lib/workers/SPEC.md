@@ -35,6 +35,7 @@ Workers operate with tiered autonomy. T3 may apply high-confidence corrections d
 | Direct commit to `main` | ❌ | ❌ | ❌ |
 | Modify protocol/var content directly | ❌ | ❌ | ✅ (high-confidence corrections with reasoning log) |
 | Cleanse `/reports` (dedup, remove stale) | ❌ | ❌ | ✅ |
+| Capture training pairs to `/corrections` | ❌ | ❌ | ✅ (every correction — sanitized, append-only) |
 | Trigger escalation to Raw | ✅ (CRITICAL only) | ✅ (CRITICAL only) | ✅ (unresolvable only, with full reasoning attached) |
 
 > **Escalation policy:** Raw receives escalations only when T3 has exhausted its reasoning and cannot determine the correct resolution. Every escalation to Raw must include T3's full reasoning chain — not a raw problem statement. Raw makes a decision, not a diagnosis.
@@ -56,6 +57,7 @@ T3 (Deep validator)
   ├── Low-confidence findings → PR opened with full reasoning attached
   ├── PR review comments → GitHub (block or approve)
   ├── Cleansed reports → atp-instance/reports/ (removes duplicates, synthesizes anomalies)
+  ├── Training pairs → atp-instance/corrections/ (every correction, sanitized, append-only — future fine-tune corpus)
   └── Escalations to Raw → only when T3 reasoning exhausted, full reasoning pre-attached
 ```
 
