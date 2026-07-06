@@ -1,5 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
+
+// ESM-compatible __dirname shim
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * ATP Hook — handler.ts
