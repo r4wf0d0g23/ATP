@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "scenario_id": "sanitized-happy-path",
+  "seed": 7,
+  "clock": "2026-01-02T03:04:05Z",
+  "protocol": {
+    "id": "example-protocol",
+    "required_vars": ["example-state"],
+    "tool_allowlist": ["filesystem", "command", "endpoint", "production-readonly"],
+    "checkpoint_mode": "rollback-and-stop"
+  },
+  "variables": {"available": ["example-state"], "valid": ["example-state"]},
+  "steps": [
+    {"tool": "production-readonly", "operation": "read", "target": "fixture://catalog/item"},
+    {"tool": "command", "operation": "simulate"},
+    {"tool": "endpoint", "operation": "get", "target": "fixture://health"},
+    {"tool": "filesystem", "operation": "write", "target": "/sandbox/state.json", "value": {"count": 1}}
+  ],
+  "fault": null,
+  "receipt_variant": "valid",
+  "expected": {"status": "completed", "mutated": true}
+}

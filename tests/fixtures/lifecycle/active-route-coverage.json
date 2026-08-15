@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Sanitized one-to-one aliases for the ten active routes in the reference instance inventory; no private route names or values are retained.",
+  "routes": [
+    "route-01", "route-02", "route-03", "route-04", "route-05",
+    "route-06", "route-07", "route-08", "route-09", "route-10"
+  ]
+}
