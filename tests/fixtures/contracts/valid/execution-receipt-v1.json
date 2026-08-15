@@ -1,0 +1,42 @@
+{
+  "receipt_id": "rcp_44444444444444444444444444444444",
+  "schema_version": "1.0.0",
+  "bundle_id": "bnd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decision_id": "dec_99999999999999999999999999999999",
+  "run_id": "run_11111111111111111111111111111111",
+  "plan_id": "pln_22222222222222222222222222222222",
+  "protocol_id": "example-protocol",
+  "bundle_sha256": "97f5e95a380ae268f15a1cb27b661e0dd1e5d5fbde8485b3cb2c792a3731bd61",
+  "protocol_pin": {
+    "kind": "protocol",
+    "id": "example-protocol",
+    "version": "1.0.0",
+    "schema_version": "1.0.0",
+    "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "variable_pins": [
+    {
+      "kind": "variable",
+      "id": "example-state",
+      "version": "1.2.0",
+      "schema_version": "0.2.0",
+      "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "attestation_id": "att_11111111111111111111111111111111",
+      "validator_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "receipt_sha256": "a9c7076ef386bc70f548ab195500950ce22e0653e52deac4d50ee578c99f338f",
+  "completed_at": "2026-08-15T20:05:00Z",
+  "execution_phase_reached": "output",
+  "result": "success",
+  "changes": [],
+  "var_updates": [],
+  "next_action": "none",
+  "state_after": {
+    "summary": "sanitized fixture"
+  },
+  "evidence": [],
+  "rollback": "No mutation; no rollback required.",
+  "remaining_risks": [],
+  "next_package": "D04-B"
+}

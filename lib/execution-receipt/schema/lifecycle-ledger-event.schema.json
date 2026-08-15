@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/execution-receipt/lifecycle-ledger-event",
+  "title": "ATP Append-only Lifecycle Ledger Event",
+  "description": "One immutable transition in a run lifecycle. JSONL order plus sequence establishes history; events are never rewritten or deleted.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["event_id", "schema_version", "decision_id", "run_id", "plan_id", "bundle_id", "bundle_sha256", "protocol_id", "sequence", "occurred_at", "event_type", "previous_event_sha256", "event_sha256", "actor"],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^le_[a-f0-9]{32}$" },
+    "schema_version": { "const": "1.0.0" },
+    "decision_id": { "type": "string", "pattern": "^dec_[a-f0-9]{32}$" },
+    "run_id": { "type": "string", "pattern": "^run_[a-f0-9]{32}$" },
+    "plan_id": { "type": "string", "pattern": "^pln_[a-f0-9]{32}$" },
+    "bundle_id": { "type": "string", "pattern": "^bnd_[a-f0-9]{32}$" },
+    "bundle_sha256": { "$ref": "#/definitions/sha256" },
+    "protocol_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "event_type": { "type": "string", "enum": ["pending", "mutation-observed", "receipt-submitted", "completed", "failed", "violated", "bypass-granted", "reconciled"] },
+    "previous_event_sha256": { "anyOf": [{ "$ref": "#/definitions/sha256" }, { "type": "null" }] },
+    "event_sha256": { "$ref": "#/definitions/sha256", "description": "Hash of canonical event bytes with event_sha256 omitted." },
+    "receipt_id": { "type": "string", "pattern": "^rcp_[a-f0-9]{32}$" },
+    "receipt_sha256": { "$ref": "#/definitions/sha256" },
+    "mutation_evidence_sha256": { "$ref": "#/definitions/sha256" },
+    "actor": {
+      "type": "object", "required": ["kind", "id_sha256"], "additionalProperties": false,
+      "properties": { "kind": { "type": "string", "enum": ["agent", "operator", "reconciler"] }, "id_sha256": { "$ref": "#/definitions/sha256" } }
+    },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "bypass_expires_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    { "if": { "properties": { "event_type": { "const": "pending" } }, "required": ["event_type"] }, "then": { "properties": { "sequence": { "const": 0 }, "previous_event_sha256": { "type": "null" } } } },
+    { "if": { "properties": { "event_type": { "enum": ["receipt-submitted", "completed"] } }, "required": ["event_type"] }, "then": { "required": ["receipt_id", "receipt_sha256"] } },
+    { "if": { "properties": { "event_type": { "const": "mutation-observed" } }, "required": ["event_type"] }, "then": { "required": ["mutation_evidence_sha256"] } },
+    { "if": { "properties": { "event_type": { "const": "bypass-granted" } }, "required": ["event_type"] }, "then": { "required": ["reason", "bypass_expires_at"], "properties": { "actor": { "properties": { "kind": { "const": "operator" } } } } } }
+  ],
+  "definitions": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}

@@ -1,0 +1,15 @@
+[
+  {"schema":"schema/variable.schema.json","fixture":"tests/fixtures/contracts/valid/variable-v02.json","valid":true},
+  {"schema":"schema/variable.schema.json","fixture":"tests/fixtures/contracts/valid/variable-legacy-date.json","valid":true},
+  {"schema":"schema/variable.schema.json","fixture":"tests/fixtures/contracts/invalid/variable-no-verification-time.json","valid":false},
+  {"schema":"lib/validation/schema/validation-attestation.schema.json","fixture":"tests/fixtures/contracts/valid/validation-attestation.json","valid":true},
+  {"schema":"lib/validation/schema/validation-attestation.schema.json","fixture":"tests/fixtures/contracts/invalid/validation-attestation-bad-hash.json","valid":false},
+  {"schema":"schema/context-bundle.schema.json","fixture":"tests/fixtures/contracts/valid/context-bundle-v1.json","valid":true},
+  {"schema":"schema/context-bundle.schema.json","fixture":"tests/fixtures/contracts/invalid/context-bundle-unpinned.json","valid":false},
+  {"schema":"lib/execution-receipt/schema/handoff-artifact.schema.json","fixture":"tests/fixtures/contracts/valid/execution-receipt-v1.json","valid":true},
+  {"schema":"lib/execution-receipt/schema/handoff-artifact.schema.json","fixture":"tests/fixtures/contracts/invalid/execution-receipt-wrong-pin.json","valid":false},
+  {"schema":"lib/execution-receipt/schema/lifecycle-ledger-event.schema.json","fixture":"tests/fixtures/contracts/valid/ledger-pending.json","valid":true},
+  {"schema":"lib/execution-receipt/schema/lifecycle-ledger-event.schema.json","fixture":"tests/fixtures/contracts/invalid/ledger-complete-no-receipt.json","valid":false},
+  {"schema":"lib/jit-context/schema/context-plan.schema.json","fixture":"tests/fixtures/contracts/valid/context-plan.json","valid":true},
+  {"schema":"lib/jit-context/schema/context-plan.schema.json","fixture":"tests/fixtures/contracts/invalid/context-plan-variable-content.json","valid":false}
+]

@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/jit-context/context-plan",
+  "title": "ATP Deterministic Context Plan",
+  "description": "Content-free inclusion plan for rendering pinned protocol sections and verified variables within a fixed token budget.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["context_plan_id", "schema_version", "decision_id", "bundle_id", "bundle_sha256", "protocol_pin", "mode", "budget", "sections", "variables", "plan_sha256", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "context_plan_id": { "type": "string", "pattern": "^cplan_[a-f0-9]{32}$" },
+    "schema_version": { "const": "1.0.0" },
+    "decision_id": { "type": "string", "pattern": "^dec_[a-f0-9]{32}$" },
+    "bundle_id": { "type": "string", "pattern": "^bnd_[a-f0-9]{32}$" },
+    "bundle_sha256": { "$ref": "#/definitions/sha256" },
+    "protocol_pin": {
+      "type": "object", "required": ["id", "version", "content_sha256"], "additionalProperties": false,
+      "properties": { "id": { "type": "string", "pattern": "^[a-z0-9-]+$" }, "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }, "content_sha256": { "$ref": "#/definitions/sha256" } }
+    },
+    "mode": { "type": "string", "enum": ["full", "shadow", "selective"] },
+    "budget": {
+      "type": "object", "required": ["limit_tokens", "reserved_mandatory_tokens", "planned_tokens"], "additionalProperties": false,
+      "properties": {
+        "limit_tokens": { "type": "integer", "minimum": 1 },
+        "reserved_mandatory_tokens": { "type": "integer", "minimum": 0 },
+        "planned_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section_id", "class", "source_sha256", "order", "decision", "estimated_tokens", "reason_code"],
+        "additionalProperties": false,
+        "properties": {
+          "section_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+          "class": { "type": "string", "enum": ["mandatory-core", "step", "optional-reference"] },
+          "source_sha256": { "$ref": "#/definitions/sha256" },
+          "order": { "type": "integer", "minimum": 0 },
+          "decision": { "type": "string", "enum": ["include", "omit", "defer"] },
+          "estimated_tokens": { "type": "integer", "minimum": 0 },
+          "reason_code": { "type": "string", "enum": ["mandatory", "step-required", "budget-selected", "budget-omitted", "jit-deferred", "legacy-full-fallback"] }
+        }
+      }
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["var_id", "pin_sha256", "consumer_step_id", "decision"], "additionalProperties": false,
+        "properties": {
+          "var_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "pin_sha256": { "$ref": "#/definitions/sha256" },
+          "consumer_step_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+          "decision": { "const": "jit-defer" }
+        }
+      }
+    },
+    "omission_trace": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["section_id", "reason_code"], "additionalProperties": false,
+        "properties": { "section_id": { "type": "string" }, "reason_code": { "type": "string", "enum": ["budget-omitted", "not-required", "legacy-unavailable"] } }
+      },
+      "description": "Metadata only; never contains omitted section text or variable values."
+    },
+    "plan_sha256": { "$ref": "#/definitions/sha256", "description": "Hash of canonical plan bytes with plan_sha256 omitted." },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "definitions": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}

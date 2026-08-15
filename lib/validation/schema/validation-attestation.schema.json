@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/validation/validation-attestation",
+  "title": "ATP Variable Validation Attestation",
+  "description": "Immutable runtime evidence that one pinned variable definition was validated without storing its private value.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["attestation_id", "var_id", "var_version", "var_sha256", "validator_sha256", "policy", "verified_at", "expires_at", "status", "value_sha256"],
+  "additionalProperties": false,
+  "properties": {
+    "attestation_id": { "type": "string", "pattern": "^att_[a-f0-9]{32}$" },
+    "var_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "var_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "var_sha256": { "$ref": "#/definitions/sha256" },
+    "validator_sha256": { "$ref": "#/definitions/sha256" },
+    "policy": { "type": "string", "pattern": "^(always-verify|session-cache(:\\d+m)?|ttl:\\d+d|on-change-only)$" },
+    "verified_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": ["string", "null"], "format": "date-time", "description": "Null only for on-change-only. Consumers enforce expires_at > verified_at." },
+    "status": { "type": "string", "enum": ["pass", "warn", "fail", "poison-suspected"] },
+    "value_sha256": { "$ref": "#/definitions/sha256" },
+    "dependency_attestation_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^att_[a-f0-9]{32}$" }, "default": [] },
+    "session_scope_sha256": { "$ref": "#/definitions/sha256" },
+    "runner": {
+      "type": "object",
+      "required": ["exit_code", "duration_ms", "stdout_truncated", "stderr_truncated"],
+      "additionalProperties": false,
+      "properties": {
+        "exit_code": { "type": "integer" },
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "stdout_truncated": { "type": "boolean" },
+        "stderr_truncated": { "type": "boolean" }
+      }
+    }
+  },
+  "definitions": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}

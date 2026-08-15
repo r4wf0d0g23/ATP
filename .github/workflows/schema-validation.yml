@@ -45,6 +45,12 @@ jobs:
           python3 -m pip install --quiet jsonschema
           python3 tests/contracts/validate_contracts.py
 
+      - name: Validate contract fixtures and cross-contract invariants
+        run: |
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0
+          python3 tests/contracts/validate.py
+          python3 tests/contracts/validate_invariants.py
+
   validate-templates:
     name: Validate template frontmatter against schemas
     runs-on: ubuntu-latest

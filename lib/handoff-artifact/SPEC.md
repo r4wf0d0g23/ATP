@@ -38,5 +38,6 @@ atp-instance/artifacts/YYYY-MM-DD-<bundle_id>-handoff.json
 
 See `lib/execution-receipt/schema/handoff-artifact.schema.json` for the full JSON Schema.
 
-Key required fields: `bundle_id`, `protocol_id`, `completed_at`, `execution_phase_reached`,
-`result`, `changes`, `var_updates`, `next_action`, `state_after`.
+Key required fields include `receipt_id`, `run_id`, `plan_id`, `bundle_id`,
+exact bundle/protocol/variable pins, evidence, rollback, remaining risks,
+`completed_at`, `result`, `changes`, and `state_after`.
