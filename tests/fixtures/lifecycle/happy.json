@@ -7,7 +7,8 @@
     "id": "example-protocol",
     "required_vars": ["example-state"],
     "tool_allowlist": ["filesystem", "command", "endpoint", "production-readonly"],
-    "checkpoint_mode": "rollback-and-stop"
+    "checkpoint_mode": "rollback-and-stop",
+    "clean_state_definition": "The in-memory fixture state is restored byte-for-byte."
   },
   "variables": {"available": ["example-state"], "valid": ["example-state"]},
   "steps": [
@@ -18,5 +19,5 @@
   ],
   "fault": null,
   "receipt_variant": "valid",
-  "expected": {"status": "completed", "mutated": true}
+  "expected": {"status": "completed", "mutated": true, "final_state": {"/sandbox/state.json": {"count": 1}}}
 }

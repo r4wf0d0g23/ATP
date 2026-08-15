@@ -14,12 +14,13 @@
     "clock": {"type": "string", "format": "date-time"},
     "protocol": {
       "type": "object", "additionalProperties": false,
-      "required": ["id", "required_vars", "tool_allowlist", "checkpoint_mode"],
+      "required": ["id", "required_vars", "tool_allowlist", "checkpoint_mode", "clean_state_definition"],
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
         "required_vars": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
         "tool_allowlist": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
-        "checkpoint_mode": {"enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]}
+        "checkpoint_mode": {"enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]},
+        "clean_state_definition": {"type": "string", "minLength": 10}
       }
     },
     "variables": {
@@ -54,10 +55,11 @@
     "receipt_variant": {"enum": ["valid", "missing", "forged", "invalid"], "default": "valid"},
     "expected": {
       "type": "object", "additionalProperties": false,
-      "required": ["status", "mutated"],
+      "required": ["status", "mutated", "final_state"],
       "properties": {
         "status": {"enum": ["completed", "failed", "partial", "violated"]},
-        "mutated": {"type": "boolean"}
+        "mutated": {"type": "boolean"},
+        "final_state": {"type": "object"}
       }
     }
   }
