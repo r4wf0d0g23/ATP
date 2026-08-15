@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://schema/execution-plan/1.0.0",
+  "title": "ATP Execution Plan v1",
+  "description": "A structured single or composite execution DAG derived from one route decision.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["schema_version", "plan_id", "decision_id", "request_id", "created_at", "kind", "steps", "completion_policy"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "plan_id": {"type": "string", "pattern": "^pln_[a-z0-9]{16,64}$"},
+    "decision_id": {"type": "string", "pattern": "^dec_[a-z0-9]{16,64}$"},
+    "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "kind": {"type": "string", "enum": ["single", "composite"]},
+    "steps": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step_id", "protocol_id", "bundle_id", "depends_on", "mutation_scope", "checkpoint_policy", "receipt_required", "model_class", "var_ids", "tool_allowlist", "guardrails"],
+        "additionalProperties": false,
+        "properties": {
+          "step_id": {"type": "string", "pattern": "^step_[a-z0-9]{8,64}$"},
+          "protocol_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "bundle_id": {"type": "string", "pattern": "^bnd_[a-z0-9]{16,64}$"},
+          "depends_on": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^step_[a-z0-9]{8,64}$"}},
+          "mutation_scope": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._/-]{0,127}$"}},
+          "checkpoint_policy": {"type": "string", "enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]},
+          "receipt_required": {"const": true},
+          "model_class": {"type": "string", "enum": ["fast", "balanced", "capable"]},
+          "var_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
+          "tool_allowlist": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9._-]+$"}},
+          "guardrails": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "serialization_groups": {"type": "array", "items": {"type": "object", "required": ["resource", "step_ids"], "additionalProperties": false, "properties": {"resource": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._/-]{0,127}$"}, "step_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "pattern": "^step_[a-z0-9]{8,64}$"}}}}},
+    "completion_policy": {"type": "object", "required": ["mode", "aggregate_receipt_required"], "additionalProperties": false, "properties": {"mode": {"const": "all-steps-terminal"}, "aggregate_receipt_required": {"type": "boolean"}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"kind": {"const": "single"}}}, "then": {"properties": {"steps": {"maxItems": 1}, "completion_policy": {"properties": {"aggregate_receipt_required": {"const": false}}}}}},
+    {"if": {"properties": {"kind": {"const": "composite"}}}, "then": {"properties": {"steps": {"minItems": 2}, "completion_policy": {"properties": {"aggregate_receipt_required": {"const": true}}}}}}
+  ]
+}

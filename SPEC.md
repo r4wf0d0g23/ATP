@@ -253,6 +253,7 @@ Each library in `lib/` addresses a specific gap in the ATP execution loop. Read 
 | `lib/task-intake/` | Tasks reach Captain without protocol routing; no pre-Captain intake gate | _n/a_ | draft |
 | `lib/conflict/` | Multiple protocol matches have no precedence rule | `conflict-rule.schema.json` | active |
 | `lib/protocol-index/` | String-match trigger classification doesn't scale; no RAG layer | `index-entry.schema.json` | active |
+| `lib/structured-routing/` | First-match routing cannot represent composition, ambiguity, fallback, or an execution DAG | `route-decision.schema.json`, `execution-plan.schema.json` | contract |
 
 ### Context bundles & sub-agent dispatch
 
@@ -289,6 +290,7 @@ Each library in `lib/` addresses a specific gap in the ATP execution loop. Read 
 | `lib/execution-receipt/` | No closed audit loop; tasks can complete without producing a verifiable handoff artifact | `lib/execution-receipt/schema/handoff-artifact.schema.json` (canonical) | draft |
 | `lib/outcome/` | No feedback loop; staleness review has no quality signal | `outcome.schema.json` | active |
 | `lib/escalation/` | Escalation rules exist but have no routing or ack structure | `escalation-event.schema.json` | active |
+| `lib/events/` | Routing and execution facts lack a versioned, privacy-safe correlation contract and metric vocabulary | `atp-event.schema.json` | contract |
 
 ### Autonomous QA & enforcement
 

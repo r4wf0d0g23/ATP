@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://schema/event/1.0.0",
+  "title": "ATP Event v1",
+  "description": "Privacy-safe append-only event envelope for ATP routing and execution telemetry.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["schema_version", "event_id", "event_type", "occurred_at", "correlation", "privacy", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "event_id": {"type": "string", "pattern": "^evt_[a-z0-9]{16,64}$"},
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "request.received", "route.decided", "plan.created", "bundle.created",
+        "validation.completed", "execution.started", "checkpoint.recorded",
+        "receipt.recorded", "outcome.recorded", "operator.corrected", "routing.failed"
+      ]
+    },
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "sequence": {"type": "integer", "minimum": 0},
+    "producer": {
+      "type": "object",
+      "required": ["component", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "component": {"type": "string", "pattern": "^[a-z0-9.-]+$"},
+        "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$"}
+      }
+    },
+    "correlation": {
+      "type": "object",
+      "required": ["request_id"],
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
+        "decision_id": {"type": "string", "pattern": "^dec_[a-z0-9]{16,64}$"},
+        "plan_id": {"type": "string", "pattern": "^pln_[a-z0-9]{16,64}$"},
+        "run_id": {"type": "string", "pattern": "^run_[a-z0-9]{16,64}$"},
+        "bundle_id": {"type": "string", "pattern": "^bnd_[a-z0-9]{16,64}$"},
+        "parent_event_id": {"type": "string", "pattern": "^evt_[a-z0-9]{16,64}$"}
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "required": ["classification", "content_policy", "retention_class"],
+      "additionalProperties": false,
+      "properties": {
+        "classification": {"const": "telemetry-sanitized"},
+        "content_policy": {"const": "metadata-only"},
+        "retention_class": {"type": "string", "enum": ["ephemeral", "operational", "audit"]},
+        "redactions_applied": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["prompt", "secret", "session-key", "private-var", "absolute-path", "operator-identity"]}}
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-specific, sanitized metadata. Producers MUST NOT place prompt text, secrets, raw session keys, private variable values, operator identities, or absolute private paths here.",
+      "propertyNames": {"not": {"pattern": "(prompt|secret|token|password|session[_-]?key|private[_-]?var[_-]?value|raw[_-]?content|absolute[_-]?path)"}},
+      "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null", "array", "object"]}
+    }
+  }
+}
