@@ -18,7 +18,7 @@ This creates a closed audit loop: every task that enters the system must produce
 
 The receipt schema is defined in `lib/execution-receipt/schema/handoff-artifact.schema.json`. Execution receipts are handoff artifacts — there is one schema, not two.
 
-A valid receipt is a handoff artifact per `lib/execution-receipt/schema/handoff-artifact.schema.json` with the following required fields: `bundle_id`, `protocol_id`, `completed_at`, `changes`, `var_updates`, `next_action`, `state_after`.
+A valid receipt is a handoff artifact per `lib/execution-receipt/schema/handoff-artifact.schema.json` with the following required fields: `bundle_id`, `protocol_id`, `completed_at`, `execution_phase_reached`, `result`, `changes`, `var_updates`, `next_action`, `state_after`.
 
 All required fields must be present. A receipt missing any required field is treated as incomplete and flagged.
 

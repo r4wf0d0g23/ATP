@@ -13,7 +13,7 @@ Implements the Agent Task Protocol (ATP) execution loop at the OpenClaw hook lay
 
 ### agent:bootstrap
 - Injects `ATP_AGENT.md` into `bootstrapFiles` if not already present
-- Loads the protocol dispatch table from `atp/SPEC.md`
+- Loads protocol trigger patterns from `atp-instance/hook-config.json` when present, then falls back to the co-located `hook-config.default.json`
 
 ### message:preprocessed
 - Classifies the incoming message against protocol trigger patterns

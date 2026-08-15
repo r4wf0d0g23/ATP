@@ -76,7 +76,7 @@ Spec: `atp/SPEC.md`
 ## PR Process (protocol updates)
 
 ```bash
-cd ~/.openclaw/workspace/atp
+cd <workspace>/atp
 git checkout -b atp-update-YYYY-MM-DD
 # make changes to protocols/ or vars/
 git add -A && git commit -m "atp: [description]"
