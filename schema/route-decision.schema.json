@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://schema/route-decision/1.0.0",
+  "title": "ATP Route Decision v1",
+  "description": "Deterministic structured result of routing exactly one request.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["schema_version", "decision_id", "request_id", "decided_at", "disposition", "match_disposition", "candidates", "reasons"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "decision_id": {"type": "string", "pattern": "^dec_[a-f0-9]{32}$"},
+    "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
+    "decided_at": {"type": "string", "format": "date-time"},
+    "disposition": {"type": "string", "enum": ["single", "composite", "ambiguous", "fallback", "none"]},
+    "match_disposition": {"type": "string", "enum": ["specific_match", "composite_match", "ambiguous", "wildcard_fallback", "no_route", "routing_error"]},
+    "selected_protocol_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
+    "plan_id": {"type": "string", "pattern": "^pln_[a-f0-9]{32}$"},
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["protocol_id", "rank", "evidence", "authorization_basis"],
+        "additionalProperties": false,
+        "properties": {
+          "protocol_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "rank": {"type": "integer", "minimum": 1},
+          "score": {"type": "number", "minimum": 0, "maximum": 1},
+          "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["explicit-rule", "lexical-trigger", "semantic-retrieval", "priority", "trigger-specificity", "classification-specificity", "wildcard"]}},
+          "authorization_basis": {"type": "string", "enum": ["explicit", "deterministic-rule", "semantic-support-only", "none"]},
+          "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}}
+        }
+      }
+    },
+    "reasons": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["code", "summary"], "additionalProperties": false, "properties": {"code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "summary": {"type": "string", "minLength": 1, "maxLength": 240}}}},
+    "requires_operator_resolution": {"type": "boolean"},
+    "error": {"type": "object", "required": ["code", "retryable"], "additionalProperties": false, "properties": {"code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "retryable": {"type": "boolean"}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"disposition": {"const": "single"}}}, "then": {"properties": {"match_disposition": {"const": "specific_match"}, "selected_protocol_ids": {"minItems": 1, "maxItems": 1}}, "required": ["selected_protocol_ids", "plan_id"]}},
+    {"if": {"properties": {"disposition": {"const": "composite"}}}, "then": {"properties": {"match_disposition": {"const": "composite_match"}, "selected_protocol_ids": {"minItems": 2}}, "required": ["selected_protocol_ids", "plan_id"]}},
+    {"if": {"properties": {"disposition": {"const": "ambiguous"}}}, "then": {"properties": {"match_disposition": {"const": "ambiguous"}, "requires_operator_resolution": {"const": true}, "selected_protocol_ids": {"maxItems": 0}}, "required": ["requires_operator_resolution"]}},
+    {"if": {"properties": {"disposition": {"const": "fallback"}}}, "then": {"properties": {"match_disposition": {"const": "wildcard_fallback"}, "selected_protocol_ids": {"minItems": 1, "maxItems": 1}}, "required": ["selected_protocol_ids"]}},
+    {"if": {"properties": {"disposition": {"const": "none"}}}, "then": {"properties": {"match_disposition": {"enum": ["no_route", "routing_error"]}, "selected_protocol_ids": {"maxItems": 0}}}},
+    {"if": {"properties": {"match_disposition": {"const": "routing_error"}}}, "then": {"required": ["error"]}}
+  ]
+}

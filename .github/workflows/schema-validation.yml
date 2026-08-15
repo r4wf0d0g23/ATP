@@ -40,6 +40,11 @@ jobs:
             ajv compile -c ajv-formats -s "$f" --strict=false || exit 1
           done
 
+      - name: Validate public contract fixtures
+        run: |
+          python3 -m pip install --quiet jsonschema
+          python3 tests/contracts/validate_contracts.py
+
   validate-templates:
     name: Validate template frontmatter against schemas
     runs-on: ubuntu-latest

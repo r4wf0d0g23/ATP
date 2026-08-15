@@ -77,6 +77,8 @@ The two top-level `protocols/` and `vars/` directories ship empty (gitignored). 
 - **Variable** — named cache of infrastructure or config state with a `staleness_policy` and `verify_cmd`. Agents verify before acting, never assume from memory. Schema: `schema/variable.schema.json`.
 - **Tiers** — two execution roles: **orchestration** (Captain) routes tasks and aggregates state; **execution** (sub-agent) runs exactly one protocol in an isolated session. Defined in `lib/orchestration/`.
 - **Context bundle** — the typed payload an orchestrator sends to a sub-agent: `protocol_id`, `var_ids[]`, `guardrails`, `task_description`, `model_class`. Schema: `schema/context-bundle.schema.json`.
+- **Route decision / execution plan** — the structured routing result (`single`, `composite`, `ambiguous`, `fallback`, or `none`) and its per-step execution DAG. Schemas: `schema/route-decision.schema.json` and `schema/execution-plan.schema.json`.
+- **ATP event** — a versioned, privacy-safe telemetry envelope correlated by request, decision, plan, run, and bundle IDs. Schema: `schema/atp-event.schema.json`.
 - **Handoff artifact / execution receipt** — the structured receipt every sub-agent writes on completion (success, partial, or failure). Required gate: a task without a receipt is not considered complete. See `lib/execution-receipt/` and `lib/handoff-artifact/`.
 - **Workers (T1 / T2 / T3)** — autonomous QA layer. T1 = scheduled scanner (`fast` model), T2 = event-driven watcher (`balanced`), T3 = deep validator (`capable`, frequency scales inversely with model cost). See `lib/workers/`.
 - **Classification** — every protocol and var declares `public` (generic, ATP repo), `template` (public placeholder, ATP repo), or `private` (live values, instance-only).
