@@ -5,12 +5,13 @@
   "description": "Content-free inclusion plan for rendering pinned protocol sections and verified variables within a fixed token budget.",
   "x-schema-version": "1.0.0",
   "type": "object",
-  "required": ["context_plan_id", "schema_version", "bundle_id", "bundle_sha256", "protocol_pin", "mode", "budget", "sections", "variables", "plan_sha256", "created_at"],
+  "required": ["context_plan_id", "schema_version", "decision_id", "bundle_id", "bundle_sha256", "protocol_pin", "mode", "budget", "sections", "variables", "plan_sha256", "created_at"],
   "additionalProperties": false,
   "properties": {
     "context_plan_id": { "type": "string", "pattern": "^cplan_[a-f0-9]{32}$" },
     "schema_version": { "const": "1.0.0" },
-    "bundle_id": { "type": "string", "minLength": 1 },
+    "decision_id": { "type": "string", "pattern": "^dec_[a-f0-9]{32}$" },
+    "bundle_id": { "type": "string", "pattern": "^bnd_[a-f0-9]{32}$" },
     "bundle_sha256": { "$ref": "#/definitions/sha256" },
     "protocol_pin": {
       "type": "object", "required": ["id", "version", "content_sha256"], "additionalProperties": false,

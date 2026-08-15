@@ -1,8 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "bundle_id": "example-protocol-20260815-abc123",
+  "bundle_id": "bnd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decision_id": "dec_99999999999999999999999999999999",
   "run_id": "run_11111111111111111111111111111111",
-  "plan_id": "plan_22222222222222222222222222222222",
+  "plan_id": "pln_22222222222222222222222222222222",
   "protocol_id": "example-protocol",
   "protocol_pin": {
     "kind": "protocol",
@@ -17,13 +18,13 @@
       "id": "example-state",
       "version": "1.2.0",
       "schema_version": "0.2.0",
-      "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "attestation_id": "att_11111111111111111111111111111111",
-      "validator_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      "validator_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     }
   ],
   "plugin_version": "1.0.0",
-  "bundle_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "bundle_sha256": "97f5e95a380ae268f15a1cb27b661e0dd1e5d5fbde8485b3cb2c792a3731bd61",
   "context_plan_id": "cplan_33333333333333333333333333333333",
   "task_description": "Validate the sanitized example execution contract.",
   "session_type": "isolated",

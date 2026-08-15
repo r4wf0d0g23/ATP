@@ -39,6 +39,10 @@ cross-document equality. Implementations must enforce the checks specified in
 the bundle, freshness, receipt, ledger, and context-plan specs. In particular,
 schema-valid does not mean correlated, fresh, untampered, or complete.
 
+The dependency-free reference implementation is
+`lib/contracts/validator.py`. Its stable error codes are exercised by
+adversarial tests and are the minimum owning-layer behavior for runtime work.
+
 ## Privacy boundary
 
 Public fixtures use generic IDs and placeholder hashes. Runtime snapshots,

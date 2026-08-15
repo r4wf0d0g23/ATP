@@ -9,6 +9,7 @@
     "receipt_id",
     "schema_version",
     "bundle_id",
+    "decision_id",
     "run_id",
     "plan_id",
     "protocol_id",
@@ -30,12 +31,13 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "receipt_id": { "type": "string", "pattern": "^receipt_[a-f0-9]{32}$" },
+    "receipt_id": { "type": "string", "pattern": "^rcp_[a-f0-9]{32}$" },
     "schema_version": { "const": "1.0.0" },
+    "decision_id": { "type": "string", "pattern": "^dec_[a-f0-9]{32}$" },
     "bundle_id": {
       "type": "string",
-      "minLength": 1,
-      "description": "Unique receipt identifier. Must match the bundle_id assigned when the task was spawned so T2 can correlate receipts to spawned tasks."
+      "pattern": "^bnd_[a-f0-9]{32}$",
+      "description": "Canonical bundle correlation identifier assigned at dispatch."
     },
     "protocol_id": {
       "type": "string",
@@ -43,7 +45,7 @@
       "description": "ID of the protocol that produced this receipt. kebab-case, matches the protocol's frontmatter `id`."
     },
     "run_id": { "type": "string", "pattern": "^run_[a-f0-9]{32}$" },
-    "plan_id": { "type": "string", "pattern": "^plan_[a-f0-9]{32}$" },
+    "plan_id": { "type": "string", "pattern": "^pln_[a-f0-9]{32}$" },
     "bundle_sha256": { "$ref": "#/definitions/sha256" },
     "protocol_pin": { "$ref": "#/definitions/protocol_pin" },
     "variable_pins": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/definitions/variable_pin" } },

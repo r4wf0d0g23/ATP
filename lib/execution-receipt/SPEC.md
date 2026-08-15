@@ -69,6 +69,11 @@ mutation is covered by receipt changes/evidence. Crash reconciliation may append
 Emergency bypass requires an operator-hashed identity, reason, and future
 expiry and is itself immutable. A bypass does not rewrite history.
 
+The executable reference checks in `../contracts/validator.py` enforce exactly
+one pending event, contiguous sequence and previous-hash links, duplicate and
+different-byte tamper detection, receipt-backed terminal legality, no events
+after terminal state, and bypass expiry.
+
 Legacy receipts are imported as non-terminal `legacy-observed` evidence in
 observe mode (represented privately as a reconciliation reason), never as v1
 completion. Warn/enforce require a new attributable v1 receipt.
@@ -103,8 +108,9 @@ T2 scans for receipt
 Receipt valid? → YES → task complete
              → NO  → T3 analyzes
                        ↓
-                       T3 recoverable? → YES → reconstruct receipt, log `warn`
-                                       → NO  → mark `critical`, open ATP PR for gap
+                       T3 evidence recoverable? → YES → append `reconciled` violation evidence;
+                                                       outcome remains unknown, no success receipt
+                                                → NO  → mark `critical`, open ATP PR for gap
                                                  ↓
                                                  T3 cannot resolve? → `critical` escalation to Raw
 ```
@@ -117,8 +123,13 @@ Raw only receives `critical` escalations — forged receipts or systemic receipt
 |------|------------------|
 | T2 receipt scan | <5s |
 | Receipt validation (field check) | <1s |
-| T3 log reconstruction attempt | 30–60s |
+| T3 provenance recovery attempt | 30–60s |
 | Receipt write (sub-agent side) | <2s |
 | Violation log write | <2s |
 | Total (valid receipt) | <6s |
-| Total (missing receipt, T3 recovers) | 60–90s |
+| Total (missing receipt, T3 records unknown provenance) | 60–90s |
+
+Recovered logs may produce a separately labeled reconciliation record with
+`provenance: reconstructed` and `outcome: unknown`. Such a record is evidence
+of a violation, not an execution receipt, and can never be promoted to the
+original run's success.

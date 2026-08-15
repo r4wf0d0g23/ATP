@@ -40,5 +40,10 @@ or legacy protocols fall back to full loading. Identical pinned inputs, compiler
 version, and token budget must produce byte-identical canonical plans. Plan
 hashing uses RFC 8785 with `plan_sha256` omitted.
 
+The executable reference validator additionally enforces exact budget
+arithmetic, mandatory inclusion, unique section IDs and contiguous unique
+orders, valid reason/decision pairs, and one JIT variable entry matching every
+bundle variable pin.
+
 See `schema/context-plan.schema.json`, `SECTION-AUTHORING.md`, and the root
 `schema/context-bundle.schema.json`.

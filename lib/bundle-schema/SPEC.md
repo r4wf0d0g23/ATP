@@ -16,6 +16,11 @@ Validates context bundles before they are passed to sub-agents. A bundle that fa
 
 ### Contract version 1
 
+Canonical correlations use only `dec_<32 hex>`, `pln_<32 hex>`,
+`run_<32 hex>`, `bnd_<32 hex>`, and `rcp_<32 hex>` for decisions, plans,
+runs, bundles, and receipts respectively. Human-readable names belong in
+separate display fields and never in correlation IDs.
+
 Every new bundle carries `run_id`, `plan_id`, an exact protocol pin, exact
 variable pins, `plugin_version`, `context_plan_id`, and `bundle_sha256`.
 Definition hashes are SHA-256 over raw bytes. Bundle hashing uses RFC 8785 JSON
@@ -75,7 +80,10 @@ PASS: { task_description: "Verify current DGX serve params via docker inspect. R
 ### Rule 6: No Credential Fields
 The bundle MUST NOT contain any of: API keys, tokens, passwords, private keys, or secret values. Credential-bearing bundles are rejected regardless of other validity.
 
-Detection: scan for keys matching `*_key`, `*_token`, `*_password`, `*_secret`, `*_api*` in bundle content.
+Detection is executable in `lib/contracts/validator.py`. It recursively scans
+task descriptions, post-state, changes, and session-bearing context for
+credential-shaped keys and values. Sanitization runs before persistence and a
+finding rejects the object; redaction after ledger hashing is forbidden.
 
 ## Rejection Behavior
 
