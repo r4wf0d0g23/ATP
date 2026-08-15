@@ -3,7 +3,7 @@
 ## Identity
 - **Competency:** Mechanical PR fix application — schema corrections, path redactions, missing-field additions, validator enum corrections
 - **Trigger:** Spawned inline by T2 when a finding has `verdict: critical` or `verdict: error` AND the finding category is in the resolver allowlist (see below)
-- **Model class:** `balanced` (Sonnet) — fixes are mechanical, not judgment-heavy. Opus weekly T3 still serves as deep-review safety net.
+- **Model class:** `balanced` (Sonnet) — fixes are mechanical, not judgment-heavy. The independent Sol T3 quality gate remains the deep-review safety net.
 - **Session type:** Isolated, ephemeral — one resolver per event
 - **Authorization:** Read all, **push commits to existing PR branches**, comment on PRs, write resolver reports
 
