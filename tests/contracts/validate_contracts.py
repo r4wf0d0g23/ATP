@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import importlib.util
 from pathlib import Path
 
 from jsonschema import Draft7Validator, FormatChecker
@@ -8,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = ROOT / "schema"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 FORBIDDEN_KEYS = {"prompt", "secret", "token", "password", "session_key", "session-key", "private_var_value", "raw_content", "absolute_path"}
+
+SANITIZER_SPEC = importlib.util.spec_from_file_location("atp_event_sanitizer", ROOT / "lib" / "events" / "sanitizer.py")
+SANITIZER = importlib.util.module_from_spec(SANITIZER_SPEC)
+assert SANITIZER_SPEC.loader is not None
+SANITIZER_SPEC.loader.exec_module(SANITIZER)
 
 
 def load(name):
@@ -102,6 +108,28 @@ def validate_cross_contract(decisions, plans):
                     assert ordered or serialized, "overlapping mutation scopes are unordered"
 
 
+def validate_sanitizer():
+    safe = {"detail": {"label": "fixture-value", "count": 2}}
+    assert SANITIZER.sanitize_payload(safe) == safe
+    assert SANITIZER.sanitize_payload(safe) is not safe
+    sensitive_values = (
+        {"detail": {"authorization": "Bearer abcdefghijklmnop"}},
+        {"detail": [{"value": "sk-abcdefghijklmnop"}]},
+        {"detail": {"value": "token=abcdefghijklmnop"}},
+        {"detail": {"value": "ghp_abcdefghijklmnop"}},
+    )
+    for value in sensitive_values:
+        try:
+            SANITIZER.sanitize_payload(value, mode="reject")
+            raise AssertionError("credential-shaped value was accepted")
+        except SANITIZER.SanitizationError:
+            pass
+        redacted = SANITIZER.sanitize_payload(value, mode="redact")
+        rendered = json.dumps(redacted)
+        assert "abcdefghijklmnop" not in rendered
+        assert "REDACTED_SENSITIVE" in rendered
+
+
 def main():
     decisions = json.loads((FIXTURES / "route-decisions.json").read_text())
     plans = json.loads((FIXTURES / "execution-plans.json").read_text())
@@ -114,6 +142,7 @@ def main():
     for plan in plans:
         validate_plan_graph(plan)
     validate_cross_contract(decisions, plans)
+    validate_sanitizer()
     for item in decisions + plans + events:
         walk_privacy(item)
     bad_fallback = dict(decisions[3], match_disposition="specific_match")
@@ -133,6 +162,13 @@ def main():
     reject("atp-event.schema.json", missing_decision_correlation)
     bad_single = dict(plans[0], completion_policy={"mode": "all-steps-terminal", "aggregate_receipt_required": True})
     reject("execution-plan.schema.json", bad_single)
+    reject("route-decision.schema.json", dict(decisions[0], decision_id="dec_0000000000000001"))
+    bad_id_event = json.loads(json.dumps(events[2]))
+    bad_id_event["correlation"]["run_id"] = "run_0000000000000000000000000000000g"
+    reject("atp-event.schema.json", bad_id_event)
+    bad_bundle_plan = json.loads(json.dumps(plans[0]))
+    bad_bundle_plan["steps"][0]["bundle_id"] = "bnd_0000000000000001"
+    reject("execution-plan.schema.json", bad_bundle_plan)
     unauthorized = json.loads(json.dumps(decisions))
     unauthorized[0]["selected_protocol_ids"] = ["missing-protocol"]
     try:

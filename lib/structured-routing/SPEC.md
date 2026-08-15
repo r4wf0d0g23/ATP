@@ -7,6 +7,8 @@
 
 The contracts deliberately separate outcome from evidence. Semantic retrieval may appear as evidence, but `semantic-support-only` is not sufficient authorization for a state-changing step.
 
+Decision, plan, and bundle identifiers use the shared canonical forms `dec_<hex32>`, `pln_<hex32>`, and `bnd_<hex32>` respectively.
+
 ## Dispositions
 
 - `single` / `specific_match`: exactly one non-wildcard protocol was selected.

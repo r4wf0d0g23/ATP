@@ -10,6 +10,8 @@ Schema: [`schema/atp-event.schema.json`](../../schema/atp-event.schema.json)
 
 Every event has an opaque `event_id` and `request_id`. Producers add `decision_id`, `plan_id`, `run_id`, and `bundle_id` as those objects come into existence. IDs are random or derived from sanitized deterministic test seeds; they must never contain a session key, username, host, filesystem path, or other private identifier. `parent_event_id` expresses causation, while `sequence` provides producer-local ordering. Timestamps are not an ordering guarantee.
 
+Shared canonical correlation IDs use exactly 32 lowercase hexadecimal characters: `dec_<hex32>`, `pln_<hex32>`, `run_<hex32>`, `bnd_<hex32>`, and `rcp_<hex32>`. Producers must not accept shortened, mixed-case, or non-hex variants.
+
 One request must yield exactly one `route.decided` or `routing.failed` terminal routing fact. A routing failure is represented by a route decision whose `disposition` is `none` and whose `match_disposition` is `routing_error`; it is never reported as `no_route`.
 
 ## Metric dictionary
@@ -35,6 +37,8 @@ Reducers must publish numerator, denominator, malformed-event count, and uncorre
 Public contracts and fixtures contain metadata only. Event payloads must not contain prompt or response bodies, secrets, credentials, raw session keys, private variable values, operator identities, or absolute private paths. Protocol IDs and reason codes are permitted only when generic or already public. Producers should hash no sensitive value unless the deployment has a documented keyed-pseudonymization policy; an ordinary hash of a low-entropy secret is not redaction.
 
 The event schema applies these key and value restrictions recursively through nested objects and arrays. Producers must validate the complete payload tree; filtering only top-level fields is non-conforming.
+
+`lib/events/sanitizer.py` is the owning reference sanitizer for payload construction. `reject` mode fails closed on forbidden keys, private paths, and credential-shaped values even when they appear beneath benign keys. `redact` mode returns a deep sanitized copy and never mutates the input. Producers must sanitize first and then validate the result against the event schema; schema validation alone is insufficient for detecting credentials embedded in ordinary string values.
 
 Retention classes are deployment policy labels:
 

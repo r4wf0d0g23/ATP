@@ -9,13 +9,13 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": "1.0.0"},
-    "decision_id": {"type": "string", "pattern": "^dec_[a-z0-9]{16,64}$"},
+    "decision_id": {"type": "string", "pattern": "^dec_[a-f0-9]{32}$"},
     "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
     "decided_at": {"type": "string", "format": "date-time"},
     "disposition": {"type": "string", "enum": ["single", "composite", "ambiguous", "fallback", "none"]},
     "match_disposition": {"type": "string", "enum": ["specific_match", "composite_match", "ambiguous", "wildcard_fallback", "no_route", "routing_error"]},
     "selected_protocol_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
-    "plan_id": {"type": "string", "pattern": "^pln_[a-z0-9]{16,64}$"},
+    "plan_id": {"type": "string", "pattern": "^pln_[a-f0-9]{32}$"},
     "candidates": {
       "type": "array",
       "items": {

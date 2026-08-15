@@ -9,8 +9,8 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": "1.0.0"},
-    "plan_id": {"type": "string", "pattern": "^pln_[a-z0-9]{16,64}$"},
-    "decision_id": {"type": "string", "pattern": "^dec_[a-z0-9]{16,64}$"},
+    "plan_id": {"type": "string", "pattern": "^pln_[a-f0-9]{32}$"},
+    "decision_id": {"type": "string", "pattern": "^dec_[a-f0-9]{32}$"},
     "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
     "created_at": {"type": "string", "format": "date-time"},
     "kind": {"type": "string", "enum": ["single", "composite"]},
@@ -23,7 +23,7 @@
         "properties": {
           "step_id": {"type": "string", "pattern": "^step_[a-z0-9]{8,64}$"},
           "protocol_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
-          "bundle_id": {"type": "string", "pattern": "^bnd_[a-z0-9]{16,64}$"},
+          "bundle_id": {"type": "string", "pattern": "^bnd_[a-f0-9]{32}$"},
           "depends_on": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^step_[a-z0-9]{8,64}$"}},
           "mutation_scope": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._/-]{0,127}$"}},
           "checkpoint_policy": {"type": "string", "enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]},

@@ -35,10 +35,11 @@
       "additionalProperties": false,
       "properties": {
         "request_id": {"type": "string", "pattern": "^req_[a-z0-9]{16,64}$"},
-        "decision_id": {"type": "string", "pattern": "^dec_[a-z0-9]{16,64}$"},
-        "plan_id": {"type": "string", "pattern": "^pln_[a-z0-9]{16,64}$"},
-        "run_id": {"type": "string", "pattern": "^run_[a-z0-9]{16,64}$"},
-        "bundle_id": {"type": "string", "pattern": "^bnd_[a-z0-9]{16,64}$"},
+        "decision_id": {"type": "string", "pattern": "^dec_[a-f0-9]{32}$"},
+        "plan_id": {"type": "string", "pattern": "^pln_[a-f0-9]{32}$"},
+        "run_id": {"type": "string", "pattern": "^run_[a-f0-9]{32}$"},
+        "bundle_id": {"type": "string", "pattern": "^bnd_[a-f0-9]{32}$"},
+        "receipt_id": {"type": "string", "pattern": "^rcp_[a-f0-9]{32}$"},
         "parent_event_id": {"type": "string", "pattern": "^evt_[a-z0-9]{16,64}$"}
       }
     },
