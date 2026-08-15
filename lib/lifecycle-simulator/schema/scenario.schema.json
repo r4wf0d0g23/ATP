@@ -19,7 +19,7 @@
         "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
         "required_vars": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
         "tool_allowlist": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
-        "checkpoint_mode": {"enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]},
+        "checkpoint_mode": {"enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop", "not-applicable"]},
         "clean_state_definition": {"type": "string", "minLength": 10}
       }
     },
@@ -32,12 +32,13 @@
       }
     },
     "steps": {
-      "type": "array", "minItems": 1,
+      "type": "array",
       "items": {
         "type": "object", "additionalProperties": false,
-        "required": ["tool", "operation"],
+        "required": ["permission", "adapter", "operation"],
         "properties": {
-          "tool": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "permission": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "adapter": {"enum": ["fixture-filesystem", "fake-command", "fake-endpoint", "production-readonly"]},
           "operation": {"type": "string", "minLength": 1},
           "target": {"type": "string"},
           "value": {}

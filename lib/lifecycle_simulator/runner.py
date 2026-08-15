@@ -100,6 +100,7 @@ class LifecycleResult:
     mutated: bool
     rolled_back: bool
     safe_checkpoint: dict[str, Any] | None
+    checkpoint_mode: str
     receipt: dict[str, Any] | None
     state_sha256: str
     error: str | None
@@ -148,23 +149,34 @@ class Simulator:
                 raise ScenarioError("required-var-missing:" + ",".join(sorted(missing)))
             if invalid := required - valid:
                 raise ScenarioError("required-var-invalid:" + ",".join(sorted(invalid)))
-            undeclared = {step["tool"] for step in scenario["steps"]} - set(protocol["tool_allowlist"])
+            undeclared = {step["permission"] for step in scenario["steps"]} - set(protocol["tool_allowlist"])
             if undeclared:
-                raise ScenarioError("tool-not-allowed:" + ",".join(sorted(undeclared)))
+                raise ScenarioError("permission-not-allowed:" + ",".join(sorted(undeclared)))
 
-            enter("execution")
+            if protocol["checkpoint_mode"] == "not-applicable":
+                unsafe = set(protocol["tool_allowlist"]) - {"read"}
+                if unsafe:
+                    raise ScenarioError("not-applicable-requires-read-only-permissions")
+
+            if scenario["steps"] or protocol["checkpoint_mode"] != "not-applicable":
+                enter("execution")
             for step in scenario["steps"]:
-                tool = step["tool"]
-                if tool == "filesystem":
+                adapter = step["adapter"]
+                if adapter == "fixture-filesystem":
                     self.fs.write(step.get("target", ""), step.get("value"))
-                elif tool == "command":
+                elif adapter == "fake-command":
                     self.command.run(step["operation"])
-                elif tool == "endpoint":
+                elif adapter == "fake-endpoint":
                     self.endpoint.request(step.get("target", ""))
-                elif tool == "production-readonly":
+                elif adapter == "production-readonly":
                     self.production_readonly.read(step.get("target", ""))
                 else:
-                    raise ScenarioError("unknown-tool:" + tool)
+                    raise ScenarioError("unknown-adapter:" + adapter)
+
+            if protocol["checkpoint_mode"] == "not-applicable":
+                enter("outcome")
+                status = "completed"
+                raise StopIteration
 
             enter("checkpoint")
             enter("receipt")
@@ -181,6 +193,8 @@ class Simulator:
 
             enter("outcome")
             status = "completed"
+        except StopIteration:
+            pass
         except ScenarioError as exc:
             error = str(exc)
             mutated = self.fs.snapshot() != before
@@ -202,7 +216,7 @@ class Simulator:
                 }
                 status = "partial"
             else:
-                status = "violated" if error.startswith(("receipt-", "tool-not-allowed")) else "failed"
+                status = "violated" if error.startswith(("receipt-", "permission-not-allowed", "not-applicable-")) else "failed"
 
         after = self.fs.snapshot()
         result = LifecycleResult(
@@ -213,6 +227,7 @@ class Simulator:
             mutated=after != before,
             rolled_back=rolled_back,
             safe_checkpoint=safe_checkpoint,
+            checkpoint_mode=scenario["protocol"]["checkpoint_mode"],
             receipt=receipt,
             state_sha256=hashlib.sha256(after).hexdigest(),
             error=error,

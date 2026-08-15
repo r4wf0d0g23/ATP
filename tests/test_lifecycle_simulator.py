@@ -50,7 +50,7 @@ class LifecycleSimulatorTests(unittest.TestCase):
         self.assertIn("required-var-missing", result.error)
 
     def test_tool_allowlist_halts_before_mutation(self):
-        protocol = dict(HAPPY["protocol"], tool_allowlist=["command"])
+        protocol = dict(HAPPY["protocol"], tool_allowlist=["exec"])
         result = Simulator().run(self.scenario(protocol=protocol, expected_status="violated", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}}))
         self.assertEqual(result.status, "violated")
         self.assertFalse(result.mutated)
@@ -65,18 +65,24 @@ class LifecycleSimulatorTests(unittest.TestCase):
     def test_sanitized_active_route_inventory_has_happy_and_failure_paths(self):
         self.assertEqual(len(ROUTE_COVERAGE["routes"]), 10)
         self.assertEqual(len({route["id"] for route in ROUTE_COVERAGE["routes"]}), 10)
+        exact_allowlists = [
+            ["exec", "read", "edit"], ["read", "write", "exec"], ["read"],
+            ["exec", "read", "write"], ["exec", "read"], ["exec", "read", "write"],
+            ["exec", "read"], ["read", "write"], ["read", "edit", "exec"], [],
+        ]
+        self.assertEqual([route["permissions"] for route in ROUTE_COVERAGE["routes"]], exact_allowlists)
         behavioral_signatures = set()
         for route in ROUTE_COVERAGE["routes"]:
-            behavioral_signatures.add((tuple(route["required_vars"]), tuple(route["tools"]), route["checkpoint_mode"], tuple(step["operation"] for step in route["steps"])))
+            behavioral_signatures.add((tuple(route["required_vars"]), tuple(route["permissions"]), route["checkpoint_mode"], tuple(step["operation"] for step in route["steps"])))
             protocol = {
                 "id": route["id"], "required_vars": route["required_vars"],
-                "tool_allowlist": route["tools"], "checkpoint_mode": route["checkpoint_mode"],
+                "tool_allowlist": route["permissions"], "checkpoint_mode": route["checkpoint_mode"],
                 "clean_state_definition": f"The sanitized {route['id']} state has a durable checkpoint.",
             }
             variables = {"available": route["required_vars"], "valid": route["required_vars"]}
             expected_state = {"/sandbox/state.json": {"count": 0}}
             for step in route["steps"]:
-                if step["tool"] == "filesystem":
+                if step["adapter"] == "fixture-filesystem":
                     expected_state[step["target"]] = step["value"]
             happy = Simulator().run(self.scenario(protocol=protocol, variables=variables, steps=route["steps"], expected_status="completed", expected_mutated=expected_state != {"/sandbox/state.json": {"count": 0}}, expected_state=expected_state))
             failed = Simulator().run(self.scenario(protocol=protocol, variables={"available": [], "valid": []}, steps=route["steps"], expected_status="failed", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}}))
@@ -117,9 +123,9 @@ class LifecycleSimulatorTests(unittest.TestCase):
 
     def test_mutation_sentinel_blocks_paths_and_network(self):
         cases = [
-            [{"tool": "filesystem", "operation": "write", "target": "/etc/config", "value": 1}],
-            [{"tool": "endpoint", "operation": "get", "target": "https://example.invalid"}],
-            [{"tool": "production-readonly", "operation": "read", "target": "/production/state"}],
+            [{"permission": "write", "adapter": "fixture-filesystem", "operation": "write", "target": "/etc/config", "value": 1}],
+            [{"permission": "read", "adapter": "fake-endpoint", "operation": "get", "target": "https://example.invalid"}],
+            [{"permission": "read", "adapter": "production-readonly", "operation": "read", "target": "/production/state"}],
         ]
         for steps in cases:
             with self.subTest(steps=steps):
@@ -142,7 +148,7 @@ class LifecycleSimulatorTests(unittest.TestCase):
         ]
         for target, symlinks in probes:
             with self.subTest(target=target, symlinks=symlinks):
-                steps = [{"tool": "filesystem", "operation": "write", "target": target, "value": "blocked"}]
+                steps = [{"permission": "write", "adapter": "fixture-filesystem", "operation": "write", "target": target, "value": "blocked"}]
                 scenario = self.scenario(steps=steps, expected_status="failed", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}})
                 result = Simulator(symlinks=symlinks).run(scenario)
                 self.assertIn("mutation-sentinel", result.error)
@@ -154,6 +160,32 @@ class LifecycleSimulatorTests(unittest.TestCase):
         self.assertEqual(result.status, "partial")
         self.assertEqual(result.safe_checkpoint["clean_state_definition"], protocol["clean_state_definition"])
         self.assertEqual(result.safe_checkpoint["state_sha256"], result.state_sha256)
+
+    def test_read_only_allowlist_blocks_write_permission_before_adapter_mutation(self):
+        protocol = dict(HAPPY["protocol"], tool_allowlist=["read"])
+        steps = [{"permission": "write", "adapter": "fixture-filesystem", "operation": "write", "target": "/sandbox/blocked.json", "value": True}]
+        simulator = Simulator()
+        result = simulator.run(self.scenario(protocol=protocol, steps=steps, expected_status="violated", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}}))
+        self.assertEqual(simulator.fs.writes, [])
+        self.assertEqual(simulator.command.calls, [])
+        self.assertEqual(simulator.endpoint.calls, [])
+        self.assertEqual(simulator.production_readonly.reads, [])
+
+    def test_empty_allowlist_and_zero_steps_call_no_adapters(self):
+        protocol = dict(HAPPY["protocol"], tool_allowlist=[], checkpoint_mode="not-applicable")
+        simulator = Simulator()
+        result = simulator.run(self.scenario(protocol=protocol, steps=[], expected_status="completed", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}}))
+        self.assertEqual(result.checkpoint_mode, "not-applicable")
+        self.assertIsNone(result.receipt)
+        self.assertEqual(result.phases, ("routing", "validation", "outcome"))
+        self.assertEqual((simulator.fs.writes, simulator.command.calls, simulator.endpoint.calls, simulator.production_readonly.reads), ([], [], [], []))
+
+    def test_not_applicable_mode_is_preserved_exactly(self):
+        protocol = dict(HAPPY["protocol"], tool_allowlist=[], checkpoint_mode="not-applicable")
+        result = Simulator().run(self.scenario(protocol=protocol, steps=[], expected_status="completed", expected_mutated=False, expected_state={"/sandbox/state.json": {"count": 0}}))
+        self.assertEqual(result.checkpoint_mode, "not-applicable")
+        self.assertNotIn("checkpoint", result.phases)
+        self.assertNotIn("receipt", result.phases)
 
 
 if __name__ == "__main__":

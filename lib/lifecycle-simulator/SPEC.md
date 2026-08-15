@@ -20,6 +20,13 @@ envelopes. Partial mutation is safe only when the checkpoint policy either
 rolls back byte-for-byte or records a checkpoint artifact containing the
 protocol's `clean_state_definition` and exact state hash.
 
+Scenario steps keep authorization separate from transport. `permission` must
+exactly match an entry in the protocol's ATP `tool_allowlist`; `adapter` selects
+only a production-incapable fixture adapter. Permission validation completes
+before the first adapter call. Empty allowlists and zero-step scenarios are
+valid. `not-applicable` is preserved for orchestration and read-only flows: it
+permits only `read`, emits no checkpoint or receipt, and never invents tools.
+
 Run the simulator suite with:
 
 ```sh

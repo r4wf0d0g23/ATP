@@ -6,16 +6,16 @@
   "protocol": {
     "id": "example-protocol",
     "required_vars": ["example-state"],
-    "tool_allowlist": ["filesystem", "command", "endpoint", "production-readonly"],
+    "tool_allowlist": ["read", "write", "exec"],
     "checkpoint_mode": "rollback-and-stop",
     "clean_state_definition": "The in-memory fixture state is restored byte-for-byte."
   },
   "variables": {"available": ["example-state"], "valid": ["example-state"]},
   "steps": [
-    {"tool": "production-readonly", "operation": "read", "target": "fixture://catalog/item"},
-    {"tool": "command", "operation": "simulate"},
-    {"tool": "endpoint", "operation": "get", "target": "fixture://health"},
-    {"tool": "filesystem", "operation": "write", "target": "/sandbox/state.json", "value": {"count": 1}}
+    {"permission": "read", "adapter": "production-readonly", "operation": "read", "target": "fixture://catalog/item"},
+    {"permission": "exec", "adapter": "fake-command", "operation": "simulate"},
+    {"permission": "read", "adapter": "fake-endpoint", "operation": "get", "target": "fixture://health"},
+    {"permission": "write", "adapter": "fixture-filesystem", "operation": "write", "target": "/sandbox/state.json", "value": {"count": 1}}
   ],
   "fault": null,
   "receipt_variant": "valid",
