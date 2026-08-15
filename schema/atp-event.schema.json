@@ -53,11 +53,33 @@
         "redactions_applied": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["prompt", "secret", "session-key", "private-var", "absolute-path", "operator-identity"]}}
       }
     },
-    "payload": {
+    "payload": {"$ref": "#/definitions/sanitized_object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event_type": {"enum": ["route.decided", "routing.failed"]}}},
+      "then": {"properties": {"correlation": {"required": ["request_id", "decision_id"]}}}
+    }
+  ],
+  "definitions": {
+    "sanitized_object": {
       "type": "object",
-      "description": "Event-specific, sanitized metadata. Producers MUST NOT place prompt text, secrets, raw session keys, private variable values, operator identities, or absolute private paths here.",
-      "propertyNames": {"not": {"pattern": "(prompt|secret|token|password|session[_-]?key|private[_-]?var[_-]?value|raw[_-]?content|absolute[_-]?path)"}},
-      "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null", "array", "object"]}
+      "description": "Recursively sanitized metadata. Prompt text, credentials, raw session keys, private variable values, operator identities, and absolute private paths are forbidden at every depth.",
+      "propertyNames": {
+        "allOf": [
+          {"pattern": "^[a-z][a-z0-9_]*$"},
+          {"not": {"pattern": "(prompt|secret|credential|token|password|session_?key|private_?var_?value|raw_?content|absolute_?path|operator_?identity)"}}
+        ]
+      },
+      "additionalProperties": {"$ref": "#/definitions/sanitized_value"}
+    },
+    "sanitized_value": {
+      "oneOf": [
+        {"type": ["number", "integer", "boolean", "null"]},
+        {"type": "string", "not": {"pattern": "^(?:/home/|/Users/|[A-Za-z]:[\\\\/]Users[\\\\/])"}},
+        {"type": "array", "items": {"$ref": "#/definitions/sanitized_value"}},
+        {"$ref": "#/definitions/sanitized_object"}
+      ]
     }
   }
 }

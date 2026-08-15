@@ -22,6 +22,8 @@ Only `single`, `composite`, and `fallback` produce execution plans. Unsupported 
 
 JSON Schema validates shape. Contract tests additionally enforce unique `step_id` and `bundle_id` values, known dependencies, an acyclic graph, and self-dependency rejection. A runtime planner must also serialize steps whose mutation scopes overlap. `serialization_groups` declares that constraint explicitly; absence of an overlap is not evidence that parallel execution is safe unless the conflict engine checked it.
 
+Cross-contract validation is mandatory: every selected protocol must be an authorized candidate with non-semantic authorization evidence; every plan must match its decision and contain only selected protocols; and every pair of overlapping mutation scopes must be ordered by a dependency path or co-listed in a serialization group.
+
 Every step retains its own protocol, vars, tool allowlist, model class, guardrails, checkpoint policy, mutation scope, bundle, and receipt requirement. Composite completion requires every step to reach a terminal state and an aggregate receipt. A plan cannot authorize work outside its corresponding route decision.
 
 ## Compatibility and migration

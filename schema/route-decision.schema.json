@@ -37,7 +37,7 @@
     "error": {"type": "object", "required": ["code", "retryable"], "additionalProperties": false, "properties": {"code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"}, "retryable": {"type": "boolean"}}}
   },
   "allOf": [
-    {"if": {"properties": {"disposition": {"const": "single"}}}, "then": {"properties": {"match_disposition": {"const": "specific_match"}, "selected_protocol_ids": {"minItems": 1, "maxItems": 1}}, "required": ["selected_protocol_ids"]}},
+    {"if": {"properties": {"disposition": {"const": "single"}}}, "then": {"properties": {"match_disposition": {"const": "specific_match"}, "selected_protocol_ids": {"minItems": 1, "maxItems": 1}}, "required": ["selected_protocol_ids", "plan_id"]}},
     {"if": {"properties": {"disposition": {"const": "composite"}}}, "then": {"properties": {"match_disposition": {"const": "composite_match"}, "selected_protocol_ids": {"minItems": 2}}, "required": ["selected_protocol_ids", "plan_id"]}},
     {"if": {"properties": {"disposition": {"const": "ambiguous"}}}, "then": {"properties": {"match_disposition": {"const": "ambiguous"}, "requires_operator_resolution": {"const": true}, "selected_protocol_ids": {"maxItems": 0}}, "required": ["requires_operator_resolution"]}},
     {"if": {"properties": {"disposition": {"const": "fallback"}}}, "then": {"properties": {"match_disposition": {"const": "wildcard_fallback"}, "selected_protocol_ids": {"minItems": 1, "maxItems": 1}}, "required": ["selected_protocol_ids"]}},

@@ -34,6 +34,8 @@ Reducers must publish numerator, denominator, malformed-event count, and uncorre
 
 Public contracts and fixtures contain metadata only. Event payloads must not contain prompt or response bodies, secrets, credentials, raw session keys, private variable values, operator identities, or absolute private paths. Protocol IDs and reason codes are permitted only when generic or already public. Producers should hash no sensitive value unless the deployment has a documented keyed-pseudonymization policy; an ordinary hash of a low-entropy secret is not redaction.
 
+The event schema applies these key and value restrictions recursively through nested objects and arrays. Producers must validate the complete payload tree; filtering only top-level fields is non-conforming.
+
 Retention classes are deployment policy labels:
 
 - `ephemeral`: discard after immediate health aggregation.
