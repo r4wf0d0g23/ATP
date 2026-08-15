@@ -258,7 +258,7 @@ Each library in `lib/` addresses a specific gap in the ATP execution loop. Read 
 
 | Library | Gap Addressed | Key Schema | Status |
 |---|---|---|---|
-| `lib/bundle-schema/` | Context bundles built ad-hoc; no build-time validation that protocol/var ids exist | `bundle.schema.json` | draft |
+| `lib/bundle-schema/` | Context bundles built ad-hoc; no build-time validation that protocol/var ids exist | _n/a (cross-registry validation contract)_ | draft |
 | `lib/bundle-prompt/` | Sub-agent prompts assembled inconsistently; quality regressions from prompt-order drift | _n/a (canonical XML structure)_ | active |
 | `lib/jit-context/` | Bundles eagerly load var content, accumulating staleness; sub-agent may never need the loaded content | _n/a (resolution contract)_ | active |
 | `lib/tool-scope/` | Sub-agents inherit full orchestrator tool set; bloated tools degrade execution quality | _n/a (allowlist contract)_ | active |
@@ -360,8 +360,7 @@ The ATP repo contains **no real variable values**. Only structural examples live
 
 | ID | Name | Classification | Notes |
 |---|---|---|---|
-| `example-live-state` | Example: Live State Variable | `template` | See `templates/vars/` |
-| `example-config-state` | Example: Config State Variable | `template` | See `templates/vars/` |
+| `example-your-var-id` | Example variable template | `template` | Shared placeholder id used by `templates/vars/live-state.md` and `templates/vars/config-state.md`; replace when instantiating |
 
 *All variables with real values are `private` and live in the instance deployment only.*
 

@@ -13,7 +13,7 @@ Use this skill when authoring or maintaining ATP protocols and variables — not
 
 **Create the file:**
 ```bash
-# File: ~/.openclaw/workspace/atp/protocols/<id>.md
+# File: <workspace>/atp/protocols/<id>.md
 # Must have valid YAML frontmatter matching schema/protocol.schema.json
 ```
 
@@ -44,7 +44,7 @@ See `references/authoring-guide.md` for full field reference, valid enum values,
 
 **Submit as PR:**
 ```bash
-cd ~/.openclaw/workspace/atp
+cd <workspace>/atp
 git checkout -b atp-new-protocol-<id>
 git add protocols/<id>.md SPEC.md ATP_AGENT.md
 git commit -m "atp: add <id> protocol"
@@ -60,7 +60,7 @@ Variable files live in `atp/vars/<id>.md`. When updating:
 4. Add row to `## Change History`
 5. Commit directly (var corrections don't need PR review):
 ```bash
-cd ~/.openclaw/workspace/atp
+cd <workspace>/atp
 git add vars/<id>.md
 git commit -m "var(<id>): update <what changed>"
 git push origin main

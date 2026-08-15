@@ -111,7 +111,7 @@ Every protocol carries a `classification` label. This determines where the file 
 |---|---|---|---|
 | `public` | Generic, reusable pattern with no deployment-specific secrets. | ATP repo `protocols/`. | Broadly applicable workflows: schema reviews, PR etiquette, memory maintenance. |
 | `template` | Public pattern with **placeholder** values meant to be copied and filled in. | ATP repo `templates/`. | Skeleton files for downstream instances to adapt. Never executed as-is. |
-| `private` | Deployment-specific, contains real endpoints / IDs / wallets / hostnames. | **Instance workspace only** (e.g. `~/.openclaw/workspace/atp/protocols/`). **Never** commit to the public ATP repo. | Real-data protocols: named deployment wallets, production endpoints, specific node hostnames. |
+| `private` | Deployment-specific, contains real endpoints / IDs / wallets / hostnames. | **Instance workspace only** (e.g. `<workspace>/atp-instance/protocols/`). **Never** commit to the public ATP repo. | Real-data protocols: named deployment wallets, production endpoints, specific node hostnames. |
 
 **Rule of thumb:** If a leak of the file would reveal infrastructure or secrets, mark it `private` and keep it out of the shared repo. Workers that scan for `private-content-leaked` findings (see `worker-report.schema.json`) enforce this.
 

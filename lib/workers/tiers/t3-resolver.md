@@ -34,7 +34,7 @@ T3-resolver is **strictly mechanical**. It does not invent fixes, redesign schem
    Read JSON. Extract:
      - pr_number
      - findings[] (each with file, severity, type, details)
-     - repo (always r4wf0d0g23/atp-instance)
+     - repo (the deployment's private ATP instance repository)
 
 2. ALLOWLIST FILTER
    For each finding:
@@ -43,7 +43,7 @@ T3-resolver is **strictly mechanical**. It does not invent fixes, redesign schem
    If zero resolvable findings → write resolver report, exit, do NOT touch branch.
 
 3. CHECKOUT PR BRANCH
-   gh pr checkout <pr_number> --repo r4wf0d0g23/atp-instance
+   gh pr checkout <pr_number> --repo <instance-repo>
    Use a worktree at /tmp/atp-resolver-<timestamp>-<pr_number> to avoid conflict
    with the main workspace clone.
 

@@ -104,7 +104,7 @@ jobs:
           done
 
   classification-guard:
-    name: Reject classification=private in public repo
+    name: Reject private deployment content in public repo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -125,3 +125,24 @@ jobs:
             exit 1
           fi
           echo "OK: no classification=private files in public-shipping paths."
+
+      - name: Reject runtime reports and deployment identifiers
+        run: |
+          set -e
+          report_files=$(find reports -maxdepth 1 -type f ! -name '.gitkeep' -print 2>/dev/null || true)
+          if [ -n "$report_files" ]; then
+            echo "ERROR: runtime reports belong in the private atp-instance repo:"
+            echo "$report_files"
+            exit 1
+          fi
+
+          violations=$(grep -rEn \
+            'r4wf0d0g23/atp-instance|/home/[^/]+/\.openclaw[^ <`]*|spark-[[:alnum:]-]+|agent-[[:alnum:]-]+\.tail[[:alnum:].-]*\.ts\.net' \
+            templates/ lib/ schema/ skills/ hooks/ protocols/ vars/ reports/ \
+            2>/dev/null || true)
+          if [ -n "$violations" ]; then
+            echo "ERROR: deployment-specific identifiers found in public-shipping content:"
+            echo "$violations"
+            exit 1
+          fi
+          echo "OK: no runtime reports or deployment identifiers in public-shipping paths."
