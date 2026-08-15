@@ -3,21 +3,35 @@
   "$id": "atp://lib/execution-receipt/handoff-artifact",
   "title": "ATP Handoff Artifact (Execution Receipt)",
   "description": "Canonical receipt schema written by a completing task (sub-agent or primary) and validated by the T2 receipt scan. Execution receipts are handoff artifacts — there is one schema, not two.",
-  "x-schema-version": "0.1.0",
+  "x-schema-version": "1.0.0",
   "type": "object",
   "required": [
+    "receipt_id",
+    "schema_version",
     "bundle_id",
+    "run_id",
+    "plan_id",
     "protocol_id",
+    "bundle_sha256",
+    "protocol_pin",
+    "variable_pins",
+    "receipt_sha256",
     "completed_at",
     "execution_phase_reached",
     "result",
     "changes",
     "var_updates",
     "next_action",
-    "state_after"
+    "state_after",
+    "evidence",
+    "rollback",
+    "remaining_risks",
+    "next_package"
   ],
   "additionalProperties": false,
   "properties": {
+    "receipt_id": { "type": "string", "pattern": "^receipt_[a-f0-9]{32}$" },
+    "schema_version": { "const": "1.0.0" },
     "bundle_id": {
       "type": "string",
       "minLength": 1,
@@ -28,6 +42,29 @@
       "pattern": "^[a-z0-9-]+$",
       "description": "ID of the protocol that produced this receipt. kebab-case, matches the protocol's frontmatter `id`."
     },
+    "run_id": { "type": "string", "pattern": "^run_[a-f0-9]{32}$" },
+    "plan_id": { "type": "string", "pattern": "^plan_[a-f0-9]{32}$" },
+    "bundle_sha256": { "$ref": "#/definitions/sha256" },
+    "protocol_pin": { "$ref": "#/definitions/protocol_pin" },
+    "variable_pins": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/definitions/variable_pin" } },
+    "receipt_sha256": { "$ref": "#/definitions/sha256", "description": "SHA-256 of canonical receipt bytes with this field omitted. Required by the ledger before terminal completion." },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "sha256", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "enum": ["test-output", "diff", "commit", "runtime-probe", "artifact"] },
+          "sha256": { "$ref": "#/definitions/sha256" },
+          "summary": { "type": "string", "minLength": 1, "maxLength": 500 }
+        }
+      },
+      "default": []
+    },
+    "rollback": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "remaining_risks": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 1000 }, "default": [] },
+    "next_package": { "type": ["string", "null"], "pattern": "^D\\d{2}-[A-Z]$", "description": "Next bounded program package, or null when none is queued." },
     "completed_at": {
       "type": "string",
       "format": "date-time",
@@ -95,6 +132,30 @@
       "type": "string",
       "enum": ["info", "warn", "critical"],
       "description": "Optional severity of the receipt itself when the task produced a notable outcome. Matches the ATP canonical severity vocabulary: info=awareness only, warn=recoverable issue, critical=halt-level. Absent when the task completed cleanly with no notable outcome."
+    }
+  },
+  "definitions": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "protocol_pin": {
+      "type": "object",
+      "required": ["kind", "id", "version", "schema_version", "content_sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "protocol" }, "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }, "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "content_sha256": { "$ref": "#/definitions/sha256" }
+      }
+    },
+    "variable_pin": {
+      "type": "object",
+      "required": ["kind", "id", "version", "schema_version", "content_sha256", "attestation_id", "validator_sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "variable" }, "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }, "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "content_sha256": { "$ref": "#/definitions/sha256" }, "attestation_id": { "type": "string", "pattern": "^att_[a-f0-9]{32}$" },
+        "validator_sha256": { "$ref": "#/definitions/sha256" }
+      }
     }
   }
 }

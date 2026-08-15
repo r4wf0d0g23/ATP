@@ -40,6 +40,12 @@ jobs:
             ajv compile -c ajv-formats -s "$f" --strict=false || exit 1
           done
 
+      - name: Validate contract fixtures and cross-contract invariants
+        run: |
+          python3 -m pip install --disable-pip-version-check jsonschema==4.23.0
+          python3 tests/contracts/validate.py
+          python3 tests/contracts/validate_invariants.py
+
   validate-templates:
     name: Validate template frontmatter against schemas
     runs-on: ubuntu-latest

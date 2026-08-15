@@ -51,9 +51,23 @@ When a protocol's context pre-load phase loads a var:
 
 ## Freshness State Storage
 
-Session freshness state is in-memory only — not persisted to disk. It resets at session start. Each session builds its own freshness picture from scratch.
+Session freshness state may be in-memory, but every successful validation also
+produces a separate immutable `validation-attestation` object. Authored variable
+files are never edited to manufacture runtime freshness.
 
-Reasoning: persisting within-session state introduces synchronization complexity without meaningful benefit. The staleness policy and `last_verified` date in the var file provide the cross-session continuity.
+Freshness is computed from precise UTC instants. `verified_at` is inclusive and
+`expires_at` is exclusive: an attestation is usable only while
+`verified_at <= now < expires_at`. `always-verify` attestations authorize one
+bounded consuming operation and are not cacheable. Clock rollback, a future
+`verified_at`, an expired attestation, a validator-hash mismatch, a definition
+hash mismatch, or a non-pass/non-warn status is stale. `warn` is usable only
+when the effective protocol explicitly permits degradation; it never permits a
+mutation.
+
+The authored `last_verified_at` timestamp is provenance, not runtime evidence.
+Legacy date-only `last_verified` values are interpreted as unknown-time and
+therefore stale until revalidated; they must never be promoted to midnight or
+end-of-day.
 
 ## Long Session Handling
 
@@ -70,4 +84,5 @@ session_ttl_minutes: <integer>   # optional; omit to use default from staleness 
 
 ## Schema
 
-See `schema/freshness-state.schema.json`.
+See `schema/freshness-state.schema.json` and
+`../validation/schema/validation-attestation.schema.json`.

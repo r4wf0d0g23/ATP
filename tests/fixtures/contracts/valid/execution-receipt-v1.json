@@ -1,0 +1,41 @@
+{
+  "receipt_id": "receipt_44444444444444444444444444444444",
+  "schema_version": "1.0.0",
+  "bundle_id": "example-protocol-20260815-abc123",
+  "run_id": "run_11111111111111111111111111111111",
+  "plan_id": "plan_22222222222222222222222222222222",
+  "protocol_id": "example-protocol",
+  "bundle_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "protocol_pin": {
+    "kind": "protocol",
+    "id": "example-protocol",
+    "version": "1.0.0",
+    "schema_version": "1.0.0",
+    "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "variable_pins": [
+    {
+      "kind": "variable",
+      "id": "example-state",
+      "version": "1.2.0",
+      "schema_version": "0.2.0",
+      "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "attestation_id": "att_11111111111111111111111111111111",
+      "validator_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "receipt_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "completed_at": "2026-08-15T20:05:00Z",
+  "execution_phase_reached": "output",
+  "result": "success",
+  "changes": [],
+  "var_updates": [],
+  "next_action": "none",
+  "state_after": {
+    "summary": "sanitized fixture"
+  },
+  "evidence": [],
+  "rollback": "No mutation; no rollback required.",
+  "remaining_risks": [],
+  "next_package": "D04-B"
+}

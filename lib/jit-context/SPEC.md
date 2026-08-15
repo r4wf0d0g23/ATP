@@ -34,4 +34,11 @@ verified in the same session by the orchestrator — pass the cached value in
 
 ## Schema
 
-See `schema/context-bundle.schema.json` (if applicable)
+The context plan contains provenance and inclusion decisions, never section or
+variable bodies. Mandatory core is byte-preserving and non-truncatable. Unknown
+or legacy protocols fall back to full loading. Identical pinned inputs, compiler
+version, and token budget must produce byte-identical canonical plans. Plan
+hashing uses RFC 8785 with `plan_sha256` omitted.
+
+See `schema/context-plan.schema.json`, `SECTION-AUTHORING.md`, and the root
+`schema/context-bundle.schema.json`.

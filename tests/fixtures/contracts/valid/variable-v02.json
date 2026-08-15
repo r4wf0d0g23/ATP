@@ -1,0 +1,1 @@
+{"id":"example-state","name":"Example State","version":"1.2.0","status":"active","classification":"template","created":"2026-01-01","last_verified_at":"2026-08-15T20:00:00Z","verified_by":"example-role","staleness_policy":"session-cache:30m","validator":"custom","verify_cmd":"example-validator --check","source":"config"}
