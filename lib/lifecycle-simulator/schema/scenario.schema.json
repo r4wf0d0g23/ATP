@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/lifecycle-simulator/scenario",
+  "title": "ATP deterministic lifecycle scenario",
+  "description": "A sanitized, implementation-neutral scenario for exercising one ATP lifecycle without production I/O.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_id", "seed", "clock", "protocol", "variables", "steps", "expected"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "scenario_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "seed": {"type": "integer", "minimum": 0},
+    "clock": {"type": "string", "format": "date-time"},
+    "protocol": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "required_vars", "tool_allowlist", "checkpoint_mode"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "required_vars": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
+        "tool_allowlist": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
+        "checkpoint_mode": {"enum": ["write-handoff-artifact", "commit-and-stop", "rollback-and-stop"]}
+      }
+    },
+    "variables": {
+      "type": "object", "additionalProperties": false,
+      "required": ["available", "valid"],
+      "properties": {
+        "available": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}},
+        "valid": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9-]+$"}}
+      }
+    },
+    "steps": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["tool", "operation"],
+        "properties": {
+          "tool": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "operation": {"type": "string", "minLength": 1},
+          "target": {"type": "string"},
+          "value": {}
+        }
+      }
+    },
+    "fault": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["phase"],
+      "properties": {
+        "phase": {"enum": ["routing", "validation", "execution", "checkpoint", "receipt", "outcome"]},
+        "kind": {"type": "string", "default": "injected"}
+      }
+    },
+    "receipt_variant": {"enum": ["valid", "missing", "forged", "invalid"], "default": "valid"},
+    "expected": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "mutated"],
+      "properties": {
+        "status": {"enum": ["completed", "failed", "partial", "violated"]},
+        "mutated": {"type": "boolean"}
+      }
+    }
+  }
+}

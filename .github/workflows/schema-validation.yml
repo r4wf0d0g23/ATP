@@ -51,6 +51,9 @@ jobs:
           python3 tests/contracts/validate.py
           python3 tests/contracts/validate_invariants.py
 
+      - name: Run deterministic lifecycle simulator
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+
   validate-templates:
     name: Validate template frontmatter against schemas
     runs-on: ubuntu-latest
