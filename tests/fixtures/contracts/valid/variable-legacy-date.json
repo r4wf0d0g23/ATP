@@ -1,0 +1,1 @@
+{"id":"legacy-state","name":"Legacy State","version":"0.9.0","status":"active","classification":"template","created":"2026-01-01","last_verified":"2026-08-15","verified_by":"example-role","staleness_policy":"ttl:1d","validator":"custom","source":"config"}

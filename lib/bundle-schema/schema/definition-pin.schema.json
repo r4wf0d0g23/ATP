@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "atp://lib/bundle-schema/definition-pin",
+  "title": "ATP Immutable Definition Pin",
+  "description": "Content-addressed pin for a protocol or variable definition authorized at dispatch.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["kind", "id", "version", "schema_version", "content_sha256"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "type": "string", "enum": ["protocol", "variable"] },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "content_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 of exact raw definition bytes, not parsed or normalized content." },
+    "attestation_id": { "type": "string", "pattern": "^att_[a-f0-9]{32}$", "description": "Required by consumers for variable pins before execution; omitted for protocol pins." },
+    "validator_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Required by consumers for variable pins; omitted for protocol pins." }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "variable" } }, "required": ["kind"] },
+      "then": { "required": ["attestation_id", "validator_sha256"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "protocol" } }, "required": ["kind"] },
+      "then": { "not": { "anyOf": [{ "required": ["attestation_id"] }, { "required": ["validator_sha256"] }] } }
+    }
+  ]
+}

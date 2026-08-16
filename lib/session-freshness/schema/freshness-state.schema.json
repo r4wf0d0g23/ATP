@@ -3,6 +3,7 @@
   "$id": "atp://lib/session-freshness/freshness-state",
   "title": "ATP Session Freshness State",
   "description": "Tracks within-session freshness of loaded variables. Detects when session-cache vars have aged past their within-session TTL.",
+  "x-schema-version": "1.0.0",
   "type": "object",
   "required": ["session_id", "session_start", "entries"],
   "additionalProperties": false,
@@ -13,10 +14,12 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["var_id", "loaded_at", "staleness_policy", "status"],
+        "required": ["var_id", "var_version", "var_sha256", "loaded_at", "staleness_policy", "status", "attestation_id", "verified_at", "expires_at"],
         "additionalProperties": false,
         "properties": {
           "var_id": { "type": "string" },
+          "var_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+          "var_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
           "loaded_at": { "type": "string", "format": "date-time" },
           "staleness_policy": { "type": "string" },
           "session_ttl_minutes": {
@@ -28,7 +31,9 @@
             "enum": ["fresh", "aging", "stale", "re-verified"],
             "description": "fresh=within TTL. aging=past 75% of TTL, re-verify recommended. stale=TTL exceeded, re-verify required. re-verified=was stale, re-verify ran and passed."
           },
-          "last_verified_at": { "type": "string", "format": "date-time" },
+          "attestation_id": { "type": "string", "pattern": "^att_[a-f0-9]{32}$" },
+          "verified_at": { "type": "string", "format": "date-time" },
+          "expires_at": { "type": ["string", "null"], "format": "date-time" },
           "use_count": {
             "type": "integer",
             "description": "Number of times this var was accessed this session"

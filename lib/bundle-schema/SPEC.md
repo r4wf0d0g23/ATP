@@ -14,6 +14,27 @@ Validates context bundles before they are passed to sub-agents. A bundle that fa
 
 ## Validation Rules
 
+### Contract version 1
+
+Canonical correlations use only `dec_<32 hex>`, `pln_<32 hex>`,
+`run_<32 hex>`, `bnd_<32 hex>`, and `rcp_<32 hex>` for decisions, plans,
+runs, bundles, and receipts respectively. Human-readable names belong in
+separate display fields and never in correlation IDs.
+
+Every new bundle carries `run_id`, `plan_id`, an exact protocol pin, exact
+variable pins, `plugin_version`, `context_plan_id`, and `bundle_sha256`.
+Definition hashes are SHA-256 over raw bytes. Bundle hashing uses RFC 8785 JSON
+Canonicalization Scheme over the complete bundle with `bundle_sha256` omitted.
+Pins and the persisted private snapshot are immutable after dispatch. A hot
+reload affects only new bundles. A pin mismatch blocks execution.
+
+The schema cannot express ordering or cross-object equality, so the owning
+validator additionally enforces: `protocol_id == protocol_pin.id`; every
+variable pin ID is unique and sorted lexicographically; attestation IDs resolve
+to attestations matching the pin's variable ID/version/content and validator
+hashes; `context_plan.bundle_sha256` matches the bundle; and recomputed hashes
+match stored hashes.
+
 ### Rule 1: Single Protocol
 A bundle MUST declare exactly one `protocol_id`. Bundles with zero or multiple protocol IDs are rejected.
 
@@ -59,7 +80,10 @@ PASS: { task_description: "Verify current DGX serve params via docker inspect. R
 ### Rule 6: No Credential Fields
 The bundle MUST NOT contain any of: API keys, tokens, passwords, private keys, or secret values. Credential-bearing bundles are rejected regardless of other validity.
 
-Detection: scan for keys matching `*_key`, `*_token`, `*_password`, `*_secret`, `*_api*` in bundle content.
+Detection is executable in `lib/contracts/validator.py`. It recursively scans
+task descriptions, post-state, changes, and session-bearing context for
+credential-shaped keys and values. Sanitization runs before persistence and a
+finding rejects the object; redaction after ledger hashing is forbidden.
 
 ## Rejection Behavior
 
@@ -69,6 +93,15 @@ When a bundle fails validation:
 3. Pass violation to T3 for root cause analysis
 4. T3 determines: orchestrator error (wrong var selection) vs protocol gap (protocol declares wrong vars)
 5. T3 corrects the bundle or opens a PR to fix the protocol — does not surface to Raw unless T3 cannot resolve
+
+## Backward-compatible migration
+
+Legacy bundles remain readable only through an explicit legacy adapter. The
+adapter assigns new correlation IDs, snapshots current definitions, validates
+every required variable, and emits a v1 bundle before execution. It records
+`legacy-migrated` provenance in the private ledger. It must not invent hashes,
+attestations, or completion. Observe mode may report an unmigrated legacy
+bundle; warn/enforce modes reject it.
 
 ## Violation Log Format
 

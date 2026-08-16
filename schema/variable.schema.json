@@ -3,9 +3,9 @@
   "$id": "atp://schema/variable",
   "title": "ATP Variable",
   "description": "Schema for Agent Task Protocol variable definition files",
-  "x-schema-version": "0.1.0",
+  "x-schema-version": "0.2.0",
   "type": "object",
-  "required": ["id", "name", "version", "status", "classification", "created", "last_verified", "verified_by", "staleness_policy", "validator", "source"],
+  "required": ["id", "name", "version", "status", "classification", "created", "verified_by", "staleness_policy", "validator", "source"],
   "additionalProperties": false,
   "properties": {
     "id": {
@@ -37,7 +37,14 @@
     },
     "last_verified": {
       "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "deprecated": true,
+      "description": "Legacy date-only authoring metadata. It is not a runtime verification attestation and MUST NOT satisfy freshness after migration to v0.2."
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Precise authoring-time verification timestamp. Runtime verification evidence belongs in a separate validation attestation."
     },
     "verified_by": {
       "type": "string",
@@ -87,6 +94,10 @@
       "description": "Variables that must be verified before this variable can be used."
     }
   },
+  "anyOf": [
+    { "required": ["last_verified_at"] },
+    { "required": ["last_verified"] }
+  ],
   "if": {
     "properties": {
       "staleness_policy": {

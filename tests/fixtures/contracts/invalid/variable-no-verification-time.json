@@ -1,0 +1,1 @@
+{"id":"broken-state","name":"Broken State","version":"1.0.0","status":"active","classification":"template","created":"2026-01-01","verified_by":"example-role","staleness_policy":"ttl:1d","validator":"custom","source":"config"}
