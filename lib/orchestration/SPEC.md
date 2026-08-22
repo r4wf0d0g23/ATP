@@ -160,6 +160,34 @@ When a sub-agent fails or is blocked:
 3. May retry with different model class, different context bundle, or surface to operator
 4. Never attempts to execute the task itself — escalate or reassign only
 
+## Context-Resolved Internal Redispatch
+
+Literal trigger matching can select a read-only fallback even when conversation
+context makes the user's intended outcome state-changing (for example, "I need a
+new one" immediately after an enrollment token expires). The orchestrator MUST
+correct that mismatch internally:
+
+1. The fallback turn loads only its permitted read-only context.
+2. If fulfilling the resolved request requires mutation, it MUST NOT ask the user
+   to repeat or reword the same authorized request.
+3. The runtime binds the permitted protocol from recent server-side route state;
+   model output cannot select a protocol, invent scope, or supply referents.
+4. The handoff contains only verbatim owner-request context plus embedded,
+   hash-pinned protocol/variable/schema bytes. Common credential forms are
+   rejected before spawn.
+5. A host-side pre-tool gate enforces the protocol tool allowlist for the child,
+   and gateway-owned child identity enforces the one-hop recursion limit.
+6. Before accepting completion, the orchestrator re-hashes pinned sources and
+   validates the receipt against the canonical schema, correlations, hash, and
+   non-empty evidence requirements.
+7. The execution turn owns checkpoint, rollback, verification, and receipt
+   obligations. The orchestrator waits and returns one user-visible
+   response. If internal dispatch itself fails under the normal retry policy, it
+   reports that real blocker instead of using user rephrasing as a routing API.
+
+This rule is a routing correction, not a bypass around protocol ownership or a
+license for the read-only parent to mutate state directly.
+
 ---
 
 ## Relationship to Other Libraries
